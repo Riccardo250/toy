@@ -18,6 +18,17 @@ const std::vector<symbol>& production::getRight() const {return right;}
 
 //grammar 
 grammar::grammar(std::set<symbol>&& alphabet, std::vector<production>&& ps) : alphabet(alphabet), productions(checkValidProductions(ps)) {}
+
+// bool grammar::allOfNullable(std::vector<symbol> vector, int startIndex, int endIndex, std::map<symbol, bool>& localNullable) {
+
+//     for(int i = startIndex; i <= endIndex; i++) {
+//         if(localNullable[vector.at(i)] == false)
+//             return false;
+//     }
+
+//     return true;
+// }
+
 std::vector<production>&& grammar::checkValidProductions(std::vector<production>& productions) {
     for(const production& p : productions) {
         if(!isProductionInAlphabet(p)) {
@@ -64,7 +75,6 @@ void grammar::generateSets() {
         localNullable[s] = false;
     }
 
-
     for(const production& p : productions) {
         if(p.getRight().size() == 0) localNullable[p.getLeft()] = true;
     }
@@ -82,40 +92,85 @@ void grammar::generateSets() {
         std::map<symbol, bool> savedLocalNullable = localNullable;
 
         for(const production& p : productions) {
-            int k = p.getRight().size();
-            for(int i = 0; i < k; i++) {
+            
+            std::cout << "###################################\n";
+            std::cout << "before:\n";
+            std::cout << "localFirst:" << localFirst << "\n";
+            std::cout << "localFollow:" << localFollow << "\n";
+            std::cout << "localNullable:" << localNullable << "\n";
+           
 
-                const symbol& currLeft = p.getLeft();
-                const std::vector<symbol>& currRight = p.getRight();
+            const symbol& currLeft = p.getLeft();
+            const std::vector<symbol>& currRight = p.getRight();
+            int k = currRight.size();
 
-                for(int j = i + 1; j < k; j++) {      
+            if(k == 0) continue;
 
-                    if(std::all_of(currRight.begin(), currRight.end(), [&localNullable](const symbol& s) {return localNullable[s];})) {
-                        localNullable[currLeft] = true;
-                        std::cout << "first if\n";
-                    }
-
-                    if(std::all_of(currRight.begin(), currRight.begin() + (i - 1), [&localNullable](const symbol& s) {return localNullable[s];})) {
-                        localFirst[currLeft].merge(localFirst[currRight.at(i)]);
-                        std::cout << "second if\n";
-                    }
-
-                    if(std::all_of(currRight.begin() + (i + 1), currRight.end(), [&localNullable](const symbol& s) {return localNullable[s];})) {
-                        localFollow[currRight.at(i)].merge(localFollow[currLeft]);
-                        std::cout << "third if\n";
-
-                    }
-
-                    if(std::all_of(currRight.begin() + (i + 1), currRight.begin() + (j - 1), [&localNullable](const symbol& s) {return localNullable[s];})) {
-                        localFollow[currRight.at(i)].merge(localFirst[currRight.at(j)]);
-                        std::cout << "fourth if\n";
-                    }
+            //first
+            bool allNullable = true;
+            for(int x = 0; x < k; x++) {
+                if(localNullable[currRight.at(x)] == false) {
+                    allNullable = false;
                 }
             }
+            if(allNullable) 
+                localNullable[currLeft] = true;
+
+            localFirst[currLeft].merge(localFirst[currRight.at(0)]);
+            localFollow[currRight.at(k - 1)].merge(localFollow[currLeft]);
+
+            //debug
+            for(int i = 0; i < k; i++) {
+
+                //first
+                allNullable = true;
+                for(int x = 0; x < i; x++) {
+                    if(localNullable[currRight.at(x)] == false) {
+                        allNullable = false;
+                    }
+                }
+
+                if(allNullable) 
+                    localFirst[currLeft].merge(localFirst[currRight.at(i)]);
+                //end first
+
+                //second
+                allNullable = true;
+                for(int x = i + 1; x < k; x++) {
+                    if(localNullable[currRight.at(x)] == false) {
+                        allNullable = false;
+                    }
+                }
+
+                if(allNullable) 
+                    localFollow[currRight.at(i)].merge(localFollow[currLeft]);
+
+                //end second
+
+                //third
+                for(int j = i + 1; j < k; j++) {
+                    allNullable = true;
+                    for(int x = i + 1; x < j; x++) {
+                        if(localNullable[currRight.at(x)] == false) {
+                            allNullable = false;
+                        }
+                    }
+
+                    if(allNullable) 
+                        localFollow[currRight.at(i)].merge(localFirst[currRight.at(j)]);
+                }
+                //end third
+            }
+
+            std::cout << "after:\n";
+            std::cout << "localFirst:" << localFirst << "\n";
+            std::cout << "localFollow:" << localFollow << "\n";
+            std::cout << "localNullable:" << localNullable << "\n";
+            std::cout << "###################################\n";
         }
 
         if(localFirst != savedLocalFirst || localFollow != savedLocalFollow || localNullable != savedLocalNullable) changed = true;
-        std::cout << "iterating ... \n";
+        
     } while(changed);
 
     first = std::move(localFirst);
@@ -128,7 +183,6 @@ void grammar::printSets() {
     std::cout << "follow: " << follow; 
     std::cout << "nullable: " << nullable;
 }
-
 
 std::ostream& operator<<(std::ostream& strm, const symbol& s) {
     return strm << s.getLabel();

@@ -49,9 +49,8 @@ class grammar {
         std::map<symbol, std::set<symbol>> follow;
         std::map<symbol, bool> nullable;
 
+        bool allOfNullable(std::vector<symbol> vector, int startIndex, int len, std::map<symbol, bool>& localNullable);
         std::vector<production>&& checkValidProductions(std::vector<production>& productions);
-
-        
         bool isProductionInAlphabet(const production& p) const;
 
     public:
