@@ -19,15 +19,15 @@ const std::vector<symbol>& production::getRight() const {return right;}
 //grammar 
 grammar::grammar(std::set<symbol>&& alphabet, std::vector<production>&& ps) : alphabet(alphabet), productions(checkValidProductions(ps)) {}
 
-// bool grammar::allOfNullable(std::vector<symbol> vector, int startIndex, int endIndex, std::map<symbol, bool>& localNullable) {
+bool grammar::allOfNullable(std::vector<symbol> vector, int startIndex, int size, std::map<symbol, bool>& localNullable) {
 
-//     for(int i = startIndex; i <= endIndex; i++) {
-//         if(localNullable[vector.at(i)] == false)
-//             return false;
-//     }
+    for(int i = startIndex; i < size; i++) {
+        if(localNullable[vector.at(i)] == false)
+            return false;
+    }
 
-//     return true;
-// }
+    return true;
+}
 
 std::vector<production>&& grammar::checkValidProductions(std::vector<production>& productions) {
     for(const production& p : productions) {
@@ -90,87 +90,36 @@ void grammar::generateSets() {
         std::map<symbol, std::set<symbol>> savedLocalFirst = localFirst;
         std::map<symbol, std::set<symbol>> savedLocalFollow = localFollow;
         std::map<symbol, bool> savedLocalNullable = localNullable;
-
+           
         for(const production& p : productions) {
             
-            std::cout << "###################################\n";
-            std::cout << "before:\n";
-            std::cout << "localFirst:" << localFirst << "\n";
-            std::cout << "localFollow:" << localFollow << "\n";
-            std::cout << "localNullable:" << localNullable << "\n";
-           
-
             const symbol& currLeft = p.getLeft();
             const std::vector<symbol>& currRight = p.getRight();
             int k = currRight.size();
 
             if(k == 0) continue;
 
-            //first
-            bool allNullable = true;
-            for(int x = 0; x < k; x++) {
-                if(localNullable[currRight.at(x)] == false) {
-                    allNullable = false;
-                }
-            }
-            if(allNullable) 
+            if(allOfNullable(currRight, 0, k, localNullable)) 
                 localNullable[currLeft] = true;
 
-            localFirst[currLeft].merge(localFirst[currRight.at(0)]);
-            localFollow[currRight.at(k - 1)].merge(localFollow[currLeft]);
-
-            //debug
             for(int i = 0; i < k; i++) {
+                if(allOfNullable(currRight, 0, i, localNullable)) 
+                    localFirst[currLeft] = merge(localFirst[currRight.at(i)], localFirst[currLeft]);
+  
 
-                //first
-                allNullable = true;
-                for(int x = 0; x < i; x++) {
-                    if(localNullable[currRight.at(x)] == false) {
-                        allNullable = false;
-                    }
-                }
+                if(allOfNullable(currRight, i + 1, k, localNullable)) 
+                    localFollow[currRight.at(i)] = merge(localFollow[currLeft] ,localFollow[currRight.at(i)]);
 
-                if(allNullable) 
-                    localFirst[currLeft].merge(localFirst[currRight.at(i)]);
-                //end first
-
-                //second
-                allNullable = true;
-                for(int x = i + 1; x < k; x++) {
-                    if(localNullable[currRight.at(x)] == false) {
-                        allNullable = false;
-                    }
-                }
-
-                if(allNullable) 
-                    localFollow[currRight.at(i)].merge(localFollow[currLeft]);
-
-                //end second
-
-                //third
                 for(int j = i + 1; j < k; j++) {
-                    allNullable = true;
-                    for(int x = i + 1; x < j; x++) {
-                        if(localNullable[currRight.at(x)] == false) {
-                            allNullable = false;
-                        }
-                    }
-
-                    if(allNullable) 
-                        localFollow[currRight.at(i)].merge(localFirst[currRight.at(j)]);
+                    if(allOfNullable(currRight, i + 1, j, localNullable)) 
+                        localFollow[currRight.at(i)] = merge(localFirst[currRight.at(j)], localFollow[currRight.at(i)]);
                 }
-                //end third
             }
-
-            std::cout << "after:\n";
-            std::cout << "localFirst:" << localFirst << "\n";
-            std::cout << "localFollow:" << localFollow << "\n";
-            std::cout << "localNullable:" << localNullable << "\n";
-            std::cout << "###################################\n";
         }
 
-        if(localFirst != savedLocalFirst || localFollow != savedLocalFollow || localNullable != savedLocalNullable) changed = true;
-        
+        if(localFirst != savedLocalFirst || localFollow != savedLocalFollow || localNullable != savedLocalNullable) 
+            changed = true;
+
     } while(changed);
 
     first = std::move(localFirst);
@@ -182,6 +131,38 @@ void grammar::printSets() {
     std::cout << "first: " << first;
     std::cout << "follow: " << follow; 
     std::cout << "nullable: " << nullable;
+}
+
+
+//TODO: understand why this is wrong
+// template<class T> 
+// std::set<T>&& merge(const std::set<T>& a, const std::set<T>& b) {
+//     std::set<T> mergedSet;
+
+//     for(const auto& el : a) {
+//         mergedSet.insert(el);
+//     }
+
+//     for(const auto& el : b) {
+//         mergedSet.insert(el);
+//     }
+
+//     return std::move(mergedSet);
+// }
+
+template<class T> 
+std::set<T> merge(const std::set<T>& a, const std::set<T>& b) {
+    std::set<T> mergedSet;
+
+    for(const auto& el : a) {
+        mergedSet.insert(el);
+    }
+
+    for(const auto& el : b) {
+        mergedSet.insert(el);
+    }
+
+    return mergedSet;
 }
 
 std::ostream& operator<<(std::ostream& strm, const symbol& s) {
@@ -223,7 +204,8 @@ std::ostream& operator<<(std::ostream& strm, const grammar& g) {
     return strm;
 }
 
-std::ostream& operator<<(std::ostream& strm, const std::map<symbol, std::set<symbol>> m) {
+template<class A, class B>
+std::ostream& operator<<(std::ostream& strm, const std::map<A, B> m) {
     strm << "{\n";
     for(const auto& p : m) {
         strm << "\t{" << p.first << " : " << p.second << "}\n";
@@ -233,15 +215,15 @@ std::ostream& operator<<(std::ostream& strm, const std::map<symbol, std::set<sym
     return strm;
 } 
 
-std::ostream& operator<<(std::ostream& strm, const std::map<symbol, bool> m) {
-    strm << "{\n";
-    for(const auto& p : m) {
-        strm << "\t{" << p.first << " : " << p.second << "}\n";
-    }
-    strm << "}\n";
+// std::ostream& operator<<(std::ostream& strm, const std::map<symbol, bool> m) {
+//     strm << "{\n";
+//     for(const auto& p : m) {
+//         strm << "\t{" << p.first << " : " << p.second << "}\n";
+//     }
+//     strm << "}\n";
 
-    return strm;
-}
+//     return strm;
+// }
 
 bool operator==(const symbol& first, const symbol& second) {
     return first.getLabel() == second.getLabel() && first.isTerminal() == second.isTerminal();

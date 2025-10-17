@@ -63,13 +63,16 @@ class grammar {
 
 
 
+
+template<class T>
+std::set<T> merge(const std::set<T>& a, const std::set<T>& b); 
 std::ostream& operator<<(std::ostream& strm, const symbol& s);
 bool operator<(const symbol& a, const symbol& b);
 std::ostream& operator<<(std::ostream& strm, const production& p);
 std::ostream& operator<<(std::ostream& strm, const std::set<symbol> set);
 std::ostream& operator<<(std::ostream& strm, const std::vector<production> productions);
 std::ostream& operator<<(std::ostream& strm, const grammar& g);
-std::ostream& operator<<(std::ostream& strm, const std::map<symbol, std::set<symbol>>);
-std::ostream& operator<<(std::ostream& strm, const std::map<symbol, bool>);
+template<class A, class B>
+std::ostream& operator<<(std::ostream& strm, const std::map<A, B>);
 bool operator==(const symbol& first, const symbol& second);
 #endif
