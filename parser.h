@@ -1,24 +1,32 @@
+#ifndef PARSER_H
+
+#define PARSER_H
+
 #include "grammar.h"
 
-class item {
-    production production;
+
+
+struct Item {
+    Production production;
     int dotPosition;
 };
 
-class state {
-    std::vector<item> items;
-};
+using State = std::set<Item>;
 
-class edge {
-    state& to;
-    symbol s;
+struct Edge {
+    State& to;
+    Symbol s;
 };
 
 class parseGraph {
     private:
-        std::vector<std::pair<state, std::vector<edge>>> adjVector;
-        state closureAction(state& state);
-        state gotoAction(state& state, symbol& symbol);
+        Grammar grammar;
+        std::vector<std::pair<State, std::vector<Edge>>> adjVector;
+        State closureAction(State& state);
+        State gotoAction(State& state, Symbol& symbol);
+        std::vector<Symbol> getProductionsWithLeftSymbol(std::vector<Production> productions, Symbol symbol);
 };
 
+bool operator==(const Item& a, const Item& b);
 
+#endif

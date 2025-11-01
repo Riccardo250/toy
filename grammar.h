@@ -12,51 +12,51 @@
 #include <set>
 #include <map>
 
-class symbol {
+class Symbol {
     private: 
         const std::string label;
         const bool terminal;
-        friend std::ostream& operator<<(std::ostream& strm, symbol &s);
+        friend std::ostream& operator<<(std::ostream& strm, Symbol &s);
 
     public:
-        symbol();
-        symbol(std::string& l, bool t);
-        symbol(std::string&& l, bool t);
+        Symbol();
+        Symbol(std::string& l, bool t);
+        Symbol(std::string&& l, bool t);
         
         const std::string& getLabel() const;
         const bool isTerminal() const;
 };
 
-class production {
+class Production {
     private:
-        const symbol left;
-        const std::vector<symbol> right;
+        const Symbol left;
+        const std::vector<Symbol> right;
 
-        friend std::ostream& operator<<(std::ostream& strm, production &p);
+        friend std::ostream& operator<<(std::ostream& strm, Production &p);
 
     public:
-        production(symbol&& left, std::vector<symbol>&& right);
-        production(symbol& left, std::vector<symbol>&& right);
-        const symbol& getLeft() const;
-        const std::vector<symbol>& getRight() const;
+        Production(Symbol&& left, std::vector<Symbol>&& right);
+        Production(Symbol& left, std::vector<Symbol>&& right);
+        const Symbol& getLeft() const;
+        const std::vector<Symbol>& getRight() const;
 };
 
-class grammar {
+class Grammar {
     private:
-        const std::set<symbol> alphabet;
-        const std::vector<production> productions;
-        std::map<symbol, std::set<symbol>> first;
-        std::map<symbol, std::set<symbol>> follow;
-        std::map<symbol, bool> nullable;
+        const std::set<Symbol> alphabet;
+        const std::vector<Production> productions;
+        std::map<Symbol, std::set<Symbol>> first;
+        std::map<Symbol, std::set<Symbol>> follow;
+        std::map<Symbol, bool> nullable;
 
-        bool allOfNullable(std::vector<symbol> vector, int startIndex, int len, std::map<symbol, bool>& localNullable);
-        std::vector<production>&& checkValidProductions(std::vector<production>& productions);
-        bool isProductionInAlphabet(const production& p) const;
+        bool allOfNullable(std::vector<Symbol> vector, int startIndex, int len, std::map<Symbol, bool>& localNullable);
+        std::vector<Production>&& checkValidProductions(std::vector<Production>& Productions);
+        bool isProductionInAlphabet(const Production& p) const;
 
     public:
-        grammar(std::set<symbol>&& a, std::vector<production>&& productions);
-        const std::set<symbol>& getAlphabet() const;
-        const std::vector<production>& getProductions() const;
+        Grammar(std::set<Symbol>&& a, std::vector<Production>&& Productions);
+        const std::set<Symbol>& getAlphabet() const;
+        const std::vector<Production>& getProductions() const;
         void generateSets();
         void printSets();
 };
@@ -66,13 +66,14 @@ class grammar {
 
 template<class T>
 std::set<T> merge(const std::set<T>& a, const std::set<T>& b); 
-std::ostream& operator<<(std::ostream& strm, const symbol& s);
-bool operator<(const symbol& a, const symbol& b);
-std::ostream& operator<<(std::ostream& strm, const production& p);
-std::ostream& operator<<(std::ostream& strm, const std::set<symbol> set);
-std::ostream& operator<<(std::ostream& strm, const std::vector<production> productions);
-std::ostream& operator<<(std::ostream& strm, const grammar& g);
+std::ostream& operator<<(std::ostream& strm, const Symbol& s);
+bool operator<(const Symbol& a, const Symbol& b);
+std::ostream& operator<<(std::ostream& strm, const Production& p);
+std::ostream& operator<<(std::ostream& strm, const std::set<Symbol> set);
+std::ostream& operator<<(std::ostream& strm, const std::vector<Production> Productions);
+std::ostream& operator<<(std::ostream& strm, const Grammar& g);
 template<class A, class B>
 std::ostream& operator<<(std::ostream& strm, const std::map<A, B>);
-bool operator==(const symbol& first, const symbol& second);
+bool operator==(const Symbol& a, const Symbol& b);
+bool operator==(const Production& a, const Production& b);
 #endif

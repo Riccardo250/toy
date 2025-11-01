@@ -2,24 +2,24 @@
 #include <stdexcept>
 #include <algorithm>
 
-//symbol
-symbol::symbol() : label(""), terminal(true) {}
-symbol::symbol(std::string& l, const bool t) : label(l), terminal (t) {}
-symbol::symbol(std::string&& l, const bool t) : label(l), terminal (t) {}
-const std::string& symbol::getLabel() const {return label;}
-const bool symbol::isTerminal() const {return terminal;}
+//Symbol
+Symbol::Symbol() : label(""), terminal(true) {}
+Symbol::Symbol(std::string& l, const bool t) : label(l), terminal (t) {}
+Symbol::Symbol(std::string&& l, const bool t) : label(l), terminal (t) {}
+const std::string& Symbol::getLabel() const {return label;}
+const bool Symbol::isTerminal() const {return terminal;}
 
-//production
-production::production(symbol&& left, std::vector<symbol>&& right) : left(left), right(right) {}
-production::production(symbol& left, std::vector<symbol>&& right) : left(left), right(right) {}
+//Production
+Production::Production(Symbol&& left, std::vector<Symbol>&& right) : left(left), right(right) {}
+Production::Production(Symbol& left, std::vector<Symbol>&& right) : left(left), right(right) {}
 
-const symbol& production::getLeft() const {return left;}
-const std::vector<symbol>& production::getRight() const {return right;}
+const Symbol& Production::getLeft() const {return left;}
+const std::vector<Symbol>& Production::getRight() const {return right;}
 
-//grammar 
-grammar::grammar(std::set<symbol>&& alphabet, std::vector<production>&& ps) : alphabet(alphabet), productions(checkValidProductions(ps)) {}
+//Grammar 
+Grammar::Grammar(std::set<Symbol>&& alphabet, std::vector<Production>&& ps) : alphabet(alphabet), productions(checkValidProductions(ps)) {}
 
-bool grammar::allOfNullable(std::vector<symbol> vector, int startIndex, int size, std::map<symbol, bool>& localNullable) {
+bool Grammar::allOfNullable(std::vector<Symbol> vector, int startIndex, int size, std::map<Symbol, bool>& localNullable) {
 
     for(int i = startIndex; i < size; i++) {
         if(localNullable[vector.at(i)] == false)
@@ -29,25 +29,25 @@ bool grammar::allOfNullable(std::vector<symbol> vector, int startIndex, int size
     return true;
 }
 
-std::vector<production>&& grammar::checkValidProductions(std::vector<production>& productions) {
-    for(const production& p : productions) {
+std::vector<Production>&& Grammar::checkValidProductions(std::vector<Production>& productions) {
+    for(const Production& p : productions) {
         if(!isProductionInAlphabet(p)) {
-            throw std::invalid_argument("One symbol of the production is not in the alphabet");
+            throw std::invalid_argument("One Symbol of the Production is not in the alphabet");
         }
     }
 
     return std::move(productions);
 }
 
-bool grammar::isProductionInAlphabet(const production& p) const {
+bool Grammar::isProductionInAlphabet(const Production& p) const {
     if (alphabet.find(p.getLeft()) == alphabet.cend()) {
-        std::cerr << "symbol " << p.getLeft() << " not found in alphabet\n";
+        std::cerr << "Symbol " << p.getLeft() << " not found in alphabet\n";
         return false;
     }
 
-    for(const symbol& s : p.getRight()) {
+    for(const Symbol& s : p.getRight()) {
         if(alphabet.find(s) == alphabet.cend()) {
-            std::cerr << "symbol " << s << " not found in alphabet\n";
+            std::cerr << "Symbol " << s << " not found in alphabet\n";
             return false;
         }
     }
@@ -55,46 +55,46 @@ bool grammar::isProductionInAlphabet(const production& p) const {
     return true;
 }
 
-const std::set<symbol>& grammar::getAlphabet() const {
+const std::set<Symbol>& Grammar::getAlphabet() const {
     return alphabet;
 }
-const std::vector<production>& grammar::getProductions() const {
+const std::vector<Production>& Grammar::getProductions() const {
     return productions;
 }
 
-void grammar::generateSets() {
-    std::map<symbol, std::set<symbol>> localFirst;
-    std::map<symbol, std::set<symbol>> localFollow;
-    std::map<symbol, bool> localNullable;
+void Grammar::generateSets() {
+    std::map<Symbol, std::set<Symbol>> localFirst;
+    std::map<Symbol, std::set<Symbol>> localFollow;
+    std::map<Symbol, bool> localNullable;
     bool changed;
 
     //initialize empty sets
-    for(const symbol& s : alphabet) {
-        localFirst[s] = std::set<symbol> ();
-        localFollow[s] = std::set<symbol> ();
+    for(const Symbol& s : alphabet) {
+        localFirst[s] = std::set<Symbol> ();
+        localFollow[s] = std::set<Symbol> ();
         localNullable[s] = false;
     }
 
-    for(const production& p : productions) {
+    for(const Production& p : productions) {
         if(p.getRight().size() == 0) localNullable[p.getLeft()] = true;
     }
 
     //alogrithm - "Modern Compiler Implemenation in C" page 57
-    for(const symbol& s : alphabet) {
+    for(const Symbol& s : alphabet) {
         if(s.isTerminal()) localFirst[s].insert(s);
     }
 
     do {
         changed = false;
         
-        std::map<symbol, std::set<symbol>> savedLocalFirst = localFirst;
-        std::map<symbol, std::set<symbol>> savedLocalFollow = localFollow;
-        std::map<symbol, bool> savedLocalNullable = localNullable;
+        std::map<Symbol, std::set<Symbol>> savedLocalFirst = localFirst;
+        std::map<Symbol, std::set<Symbol>> savedLocalFollow = localFollow;
+        std::map<Symbol, bool> savedLocalNullable = localNullable;
            
-        for(const production& p : productions) {
+        for(const Production& p : productions) {
             
-            const symbol& currLeft = p.getLeft();
-            const std::vector<symbol>& currRight = p.getRight();
+            const Symbol& currLeft = p.getLeft();
+            const std::vector<Symbol>& currRight = p.getRight();
             int k = currRight.size();
 
             if(k == 0) continue;
@@ -127,7 +127,7 @@ void grammar::generateSets() {
     nullable = std::move(localNullable);
 }
 
-void grammar::printSets() {
+void Grammar::printSets() {
     std::cout << "first: " << first;
     std::cout << "follow: " << follow; 
     std::cout << "nullable: " << nullable;
@@ -165,26 +165,26 @@ std::set<T> merge(const std::set<T>& a, const std::set<T>& b) {
     return mergedSet;
 }
 
-std::ostream& operator<<(std::ostream& strm, const symbol& s) {
+std::ostream& operator<<(std::ostream& strm, const Symbol& s) {
     return strm << s.getLabel();
 }
 
-bool operator<(const symbol& a, const symbol& b) {
+bool operator<(const Symbol& a, const Symbol& b) {
     return a.getLabel() < b.getLabel() || a.isTerminal() < b.isTerminal();
 }
 
-std::ostream& operator<<(std::ostream& strm, const production& p) {
+std::ostream& operator<<(std::ostream& strm, const Production& p) {
     strm << p.getLeft();
     strm << " ->";
-    for(const symbol& s : p.getRight()) {
+    for(const Symbol& s : p.getRight()) {
         strm << " " << s << ",";
     }
     return strm;
 }
 
-std::ostream& operator<<(std::ostream& strm, const std::set<symbol> set) {
+std::ostream& operator<<(std::ostream& strm, const std::set<Symbol> set) {
     strm << "{ ";
-    for(const symbol& s : set) {
+    for(const Symbol& s : set) {
         strm << s << ", ";
     }
     strm << "}";
@@ -192,14 +192,14 @@ std::ostream& operator<<(std::ostream& strm, const std::set<symbol> set) {
     return strm;
 }
 
-std::ostream& operator<<(std::ostream& strm, std::vector<production> productions) {
-    for(const production& p : productions) {
+std::ostream& operator<<(std::ostream& strm, std::vector<Production> productions) {
+    for(const Production& p : productions) {
         strm << p << "; ";
     }
     return strm;
 }
 
-std::ostream& operator<<(std::ostream& strm, const grammar& g) {
+std::ostream& operator<<(std::ostream& strm, const Grammar& g) {
     strm << "alphabet: " << g.getAlphabet() << " productions: " << g.getProductions();
     return strm;
 }
@@ -215,7 +215,7 @@ std::ostream& operator<<(std::ostream& strm, const std::map<A, B> m) {
     return strm;
 } 
 
-// std::ostream& operator<<(std::ostream& strm, const std::map<symbol, bool> m) {
+// std::ostream& operator<<(std::ostream& strm, const std::map<Symbol, bool> m) {
 //     strm << "{\n";
 //     for(const auto& p : m) {
 //         strm << "\t{" << p.first << " : " << p.second << "}\n";
@@ -225,6 +225,10 @@ std::ostream& operator<<(std::ostream& strm, const std::map<A, B> m) {
 //     return strm;
 // }
 
-bool operator==(const symbol& first, const symbol& second) {
-    return first.getLabel() == second.getLabel() && first.isTerminal() == second.isTerminal();
+bool operator==(const Symbol& a, const Symbol& b) {
+    return a.getLabel() == b.getLabel() && a.isTerminal() == b.isTerminal();
+}
+
+bool operator==(const Production& a, const Production& b) {
+    return a.getLeft() == b.getLeft() && a.getRight() == b.getRight();
 }
