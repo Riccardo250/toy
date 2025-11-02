@@ -7,26 +7,49 @@
 
 
 struct Item {
-    Production production;
-    int dotPosition;
+    const Production production;
+    const int dotPosition;
 };
 
 using State = std::set<Item>;
 
 struct Edge {
-    State& to;
-    Symbol s;
+    const State& to;
+    const Symbol s;
 };
 
-class parseGraph {
+struct ReduceAction {
+    const State state;
+    const Production production;
+};
+
+
+class AdjacencyVector {
+    private:
+        std::vector<std::pair<State, std::vector<Edge>>> adjacencyVector;
+        friend bool operator==(const AdjacencyVector& a, const AdjacencyVector& b);
+
+    public:
+        void addState(const State& state);
+        void addEdge(const State& from, const State& to, const Symbol s);
+        std::vector<std::pair<State, std::vector<Edge>>> getVector();
+};
+
+class ParseGraph {
     private:
         Grammar grammar;
-        std::vector<std::pair<State, std::vector<Edge>>> adjVector;
-        State closureAction(State& state);
-        State gotoAction(State& state, Symbol& symbol);
-        std::vector<Symbol> getProductionsWithLeftSymbol(std::vector<Production> productions, Symbol symbol);
+        AdjacencyVector adjacencyVector;
+        std::set<ReduceAction> reduceActions;
+        State closureAction(const State& state);
+        State gotoAction(const State& state, const Symbol& symbol);
+        void constructParser();
+        std::vector<Production> getProductionsWithLeftSymbol(std::vector<Production> productions, Symbol symbol);
+
 };
 
-bool operator==(const Item& a, const Item& b);
 
+
+bool operator==(const Item& a, const Item& b);
+bool operator==(const Edge& a, const Edge& b);
+bool operator==(const AdjacencyVector& a, const AdjacencyVector& b);
 #endif

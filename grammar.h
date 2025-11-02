@@ -43,8 +43,9 @@ class Production {
 
 class Grammar {
     private:
+        const Symbol startingSymbol;
         const std::set<Symbol> alphabet;
-        const std::vector<Production> productions;
+        std::vector<Production> productions;
         std::map<Symbol, std::set<Symbol>> first;
         std::map<Symbol, std::set<Symbol>> follow;
         std::map<Symbol, bool> nullable;
@@ -52,13 +53,16 @@ class Grammar {
         bool allOfNullable(std::vector<Symbol> vector, int startIndex, int len, std::map<Symbol, bool>& localNullable);
         std::vector<Production>&& checkValidProductions(std::vector<Production>& Productions);
         bool isProductionInAlphabet(const Production& p) const;
+        
 
     public:
-        Grammar(std::set<Symbol>&& a, std::vector<Production>&& Productions);
+        Grammar(std::set<Symbol>&& a, std::vector<Production>&& Productions, Symbol startingSymbol);
         const std::set<Symbol>& getAlphabet() const;
         const std::vector<Production>& getProductions() const;
+        const Symbol getStatingSymbol() const;
         void generateSets();
         void printSets();
+        void augmentProductions(Production production);
 };
 
 

@@ -17,7 +17,7 @@ const Symbol& Production::getLeft() const {return left;}
 const std::vector<Symbol>& Production::getRight() const {return right;}
 
 //Grammar 
-Grammar::Grammar(std::set<Symbol>&& alphabet, std::vector<Production>&& ps) : alphabet(alphabet), productions(checkValidProductions(ps)) {}
+Grammar::Grammar(std::set<Symbol>&& alphabet, std::vector<Production>&& ps, Symbol startingSymbol) : alphabet(alphabet), productions(checkValidProductions(ps)), startingSymbol(startingSymbol) {}
 
 bool Grammar::allOfNullable(std::vector<Symbol> vector, int startIndex, int size, std::map<Symbol, bool>& localNullable) {
 
@@ -131,6 +131,14 @@ void Grammar::printSets() {
     std::cout << "first: " << first;
     std::cout << "follow: " << follow; 
     std::cout << "nullable: " << nullable;
+}
+
+void Grammar::augmentProductions(Production production) {
+    productions.push_back(production);
+}
+
+const Symbol Grammar::getStatingSymbol() const {
+    return startingSymbol;
 }
 
 
