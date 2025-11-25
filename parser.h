@@ -1,10 +1,4 @@
-#ifndef PARSER_H
-
-#define PARSER_H
-
 #include "grammar.h"
-
-
 
 struct Item {
     const Production production;
@@ -14,6 +8,12 @@ struct Item {
 using State = std::set<Item>;
 
 struct Edge {
+    const State& to;
+    const Symbol s;
+};
+
+struct FreeEdge {
+    const State& from;
     const State& to;
     const Symbol s;
 };
@@ -47,9 +47,14 @@ class ParseGraph {
 
 };
 
-
-
 bool operator==(const Item& a, const Item& b);
+bool operator<(const Item& a, const Item& b);
 bool operator==(const Edge& a, const Edge& b);
+bool operator!=(const Edge& a, const Edge& b);
+bool operator==(const FreeEdge& a, const FreeEdge& b);
+bool operator!=(const FreeEdge& a, const FreeEdge& b);
+bool operator<(const FreeEdge& a, const FreeEdge& b);
+bool operator==(const ReduceAction& a, const ReduceAction& b);
+bool operator!=(const ReduceAction& a, const ReduceAction& b);
+bool operator<(const ReduceAction& a, const ReduceAction& b);
 bool operator==(const AdjacencyVector& a, const AdjacencyVector& b);
-#endif

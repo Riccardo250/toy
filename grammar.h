@@ -1,7 +1,3 @@
-#ifndef GRAMMAR_H
-
-#define GRAMMAR_H
-
 #include <cstdio>
 #include <initializer_list>
 #include <vector>
@@ -65,9 +61,6 @@ class Grammar {
         void augmentProductions(Production production);
 };
 
-
-
-
 template<class T>
 std::set<T> merge(const std::set<T>& a, const std::set<T>& b); 
 std::ostream& operator<<(std::ostream& strm, const Symbol& s);
@@ -79,5 +72,7 @@ std::ostream& operator<<(std::ostream& strm, const Grammar& g);
 template<class A, class B>
 std::ostream& operator<<(std::ostream& strm, const std::map<A, B>);
 bool operator==(const Symbol& a, const Symbol& b);
+bool operator!=(const Symbol& a, const Symbol& b);
 bool operator==(const Production& a, const Production& b);
-#endif
+bool operator!=(const Production& a, const Production& b);
+bool operator<(const Production& a, const Production& b);

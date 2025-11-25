@@ -237,6 +237,32 @@ bool operator==(const Symbol& a, const Symbol& b) {
     return a.getLabel() == b.getLabel() && a.isTerminal() == b.isTerminal();
 }
 
+bool operator!=(const Symbol& a, const Symbol& b) {
+    return !(a == b);
+}
+
 bool operator==(const Production& a, const Production& b) {
     return a.getLeft() == b.getLeft() && a.getRight() == b.getRight();
+}
+
+bool operator!=(const Production& a, const Production& b) {
+    return !(a == b);
+}
+
+bool operator<(const Production &a, const Production &b) {
+    if(a.getRight().size() != b.getRight().size()) {
+        return a.getRight().size() < b.getRight().size();
+    }
+
+    if(a.getLeft() != b.getLeft()) {
+        return a.getLeft() < b.getLeft();
+    }
+
+    for(int i = 0; i < a.getRight().size(); i++) {
+        if(a.getRight()[i] != b.getRight()[i]) {
+            return a.getRight()[i] < b.getRight()[i];
+        }
+    }
+
+    return false;
 }

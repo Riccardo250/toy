@@ -2,3 +2,4 @@ a.out
 *.gch
 x.cpp
 .vscode
+err.txt

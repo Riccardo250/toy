@@ -1,4 +1,5 @@
 #include "parser.h"
+#include <unordered_set>
 
 //parserGraph
 State ParseGraph::closureAction(const State& state) {
@@ -43,13 +44,6 @@ std::vector<Production> ParseGraph::getProductionsWithLeftSymbol(std::vector<Pro
 }
 
 void ParseGraph::constructParser() {
-
-    struct FreeEdge {
-        const State& from;
-        const State& to;
-        const Symbol s;
-    };
-
     //alogrithm - "Modern Compiler Implemenation in C" page 67
 
     Production newProduction{{"S'", false}, { {grammar.getStatingSymbol(), {"$", true} }}};
@@ -116,9 +110,54 @@ bool operator==(const Item& a, const Item& b) {
     return a.production == b.production && a.dotPosition == b.dotPosition;
 }
 
+bool operator<(const Item& a, const Item& b) {
+    if(a.production != b.production) {
+        return a.production < b.production;
+    }
+
+    if(a.dotPosition != b.dotPosition) {
+        return a.dotPosition < b.dotPosition;
+    }
+
+    return false;
+}
+
 bool operator==(const Edge& a, const Edge& b) {
     return a.s == b.s && a.to == b.to;
 }
+
+bool operator!=(const Edge&a, const Edge& b) {
+    return !(a == b);
+}
+
+bool operator==(const FreeEdge& a, const FreeEdge& b) {
+    return a.from == b.from && a.to == b.to && a.s == b.s;
+}
+
+bool operator!=(const FreeEdge& a, const FreeEdge& b) {
+    return !(a == b);
+}
+
+bool operator<(const FreeEdge& a, const FreeEdge& b) {
+    if(a.from != b.from) return a.from < b.from;
+    if(a.to != b.to) return a.to < b.to;
+    if(a.s != b.s) return a.s < b.s;
+    return false;
+}
+
+bool operator==(const ReduceAction& a, const ReduceAction& b) {
+    return a.production == b.production && a.state == b.state;
+}
+
+bool operator!=(const ReduceAction& a, const ReduceAction& b) {
+    return !(a == b);
+}
+
+bool operator<(const ReduceAction& a, const ReduceAction& b) {
+    if(a.production != b.production) return a.production < b.production;
+    if(a.state != b.state) return a.state < b.state;
+    return false;
+}   
 
 bool operator==(const AdjacencyVector& a, const AdjacencyVector& b) {
     std::vector<std::pair<State, std::vector<Edge>>> aVec = a.adjacencyVector;
