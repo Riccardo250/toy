@@ -1,0 +1,12 @@
+*.out
+err.txt
+grammar.cpp
+grammar.h
+parser_impl.h
+parser.cpp
+parser.h
+std_utils.cpp
+std_utils.h
+x.cpp
+*.txt
+
