@@ -9,4 +9,5 @@ std_utils.cpp
 std_utils.h
 x.cpp
 *.txt
+.vscode
 
