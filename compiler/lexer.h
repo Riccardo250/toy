@@ -7,7 +7,9 @@ enum class Kind : char {
     end,
     plus='+',
     equal='=',
-    endOfStatement=';'
+    endOfStatement=';',
+    lp='(',
+    rp=')'
 };
 
 struct Token {
@@ -22,11 +24,15 @@ class Token_stream {
 
         Token get();
         Token& current();
+        Token& next();
 
     private:
+        bool first = true;
         std::istream& istream;
         Token currentToken = {Kind::end};
-        void error(const std::string& errorMsg);
+        Token nextToken = {Kind::end};
+
+        Token getInternal();
 };
 
 std::ostream& operator<<(std::ostream& strm, const Token& token);
