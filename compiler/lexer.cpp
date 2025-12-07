@@ -5,6 +5,10 @@ Token& Token_stream::current() {
     return currentToken;
 }
 
+Token& Token_stream::next() {
+    return nextToken;
+}
+
 Token Token_stream::get() {
     if(first) {
         currentToken = getInternal();
@@ -31,7 +35,7 @@ Token Token_stream::getInternal() {
 
     //number
     if(isdigit(firstC)) {
-        double num;
+        int num;
         istream>>num;
         return {Kind::number, {}, num};
     }
@@ -52,9 +56,12 @@ Token Token_stream::getInternal() {
         case ';':
         case '(':
         case ')':
+        case '*':
+        case '/':
+        case '-':
             return {static_cast<Kind>(istream.get())};
         default:
-            Error::error("Invalid token");
+            Error::lexerError("Invalid token");
     }
 
     //default to make compiler happy
@@ -77,4 +84,8 @@ std::ostream& operator<<(std::ostream& strm, const Token& token) {
     }
 
     return strm;
+}
+
+void Error::lexerError(const std::string& errorMsg) {
+    std::cerr << errorMsg << "\n";
 }

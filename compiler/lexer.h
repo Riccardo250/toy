@@ -6,6 +6,9 @@ enum class Kind : char {
     name,
     end,
     plus='+',
+    minus='-',
+    mul='*',
+    div='/',
     equal='=',
     endOfStatement=';',
     lp='(',
@@ -15,7 +18,7 @@ enum class Kind : char {
 struct Token {
     Kind kind;
     std::string name;
-    double value;
+    int value;
 };
 
 class Token_stream {
@@ -34,5 +37,9 @@ class Token_stream {
 
         Token getInternal();
 };
+
+namespace Error {
+    void lexerError(const std::string& errorMsg);
+}
 
 std::ostream& operator<<(std::ostream& strm, const Token& token);
