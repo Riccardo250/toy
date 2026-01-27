@@ -5,6 +5,7 @@ enum class Kind : char {
     number,
     name,
     end,
+    function,
     plus='+',
     minus='-',
     mul='*',
@@ -15,10 +16,17 @@ enum class Kind : char {
     rp=')'
 };
 
+
+//maybe we can make this a class? And use polymorphism to get the different behaviors for the different kinds?
+// but idk how I would implement the function to get the value (we cannot make one volatile function to override)
+// cause we couldn't override it properly (different return values type)
 struct Token {
     Kind kind;
     std::string name;
     int value;
+    unsigned int totalPos;
+    unsigned int linePos;
+    unsigned int line;
 };
 
 class Token_stream {
@@ -31,11 +39,19 @@ class Token_stream {
 
     private:
         bool first = true;
+        unsigned int oldTotalPos = 0;
+        unsigned int oldLinePos = 0;
+        unsigned int currTotalPos = 0;
+        unsigned int currLinePos = 0;
+        unsigned int line = 0;
+
         std::istream& istream;
         Token currentToken = {Kind::end};
         Token nextToken = {Kind::end};
 
         Token getInternal();
+        void increaseLine();
+        void increasePos(unsigned int n);
 };
 
 namespace Error {

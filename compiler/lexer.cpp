@@ -24,6 +24,10 @@ Token Token_stream::get() {
 
 Token Token_stream::getInternal() {
     while(isspace(istream.peek())) {
+        if(istream.peek() == '\n')
+            increaseLine();
+
+        increasePos(1);
         istream.ignore();
     }
 
@@ -36,18 +40,26 @@ Token Token_stream::getInternal() {
     //number
     if(isdigit(firstC)) {
         int num;
-        istream>>num;
-        return {Kind::number, {}, num};
+        istream>>num; //in this way it is hard to count the number of read characters
+
+        // TODO: gcount returns type std::streamsize, can it be sagfely converted to unsigned int?
+        increasePos(istream.gcount());
+        return {Kind::number, {}, num, oldTotalPos, oldLinePos, line};
     }
 
     //name
     if(isalpha(firstC)) {
         std::string currString = {};
         do {
-            currString += istream.get();       
+            currString += istream.get();      
         } while(isalpha(istream.peek()));
 
-        return {Kind::name, currString, 0};
+        increasePos(currString.length());
+        
+        if(currString == "function")
+            return {Kind::function, {}, 0, oldTotalPos, oldLinePos, line};
+
+        return {Kind::name, currString, 0, oldTotalPos, oldLinePos, line};
     }
 
     switch(firstC) {
@@ -59,13 +71,26 @@ Token Token_stream::getInternal() {
         case '*':
         case '/':
         case '-':
-            return {static_cast<Kind>(istream.get())};
+            increasePos(1);
+            return {static_cast<Kind>(istream.get()), {}, 0, oldTotalPos, oldLinePos, line};
         default:
             Error::lexerError("Invalid token");
     }
 
     //default to make compiler happy
     return {Kind::end};
+}
+
+void Token_stream::increaseLine() {
+    currLinePos = 0;
+    line += 1;
+}
+
+void Token_stream::increasePos(unsigned int n) {
+    oldLinePos = currLinePos;
+    oldTotalPos = currTotalPos;
+    currLinePos += n;
+    currTotalPos += n;
 }
 
 std::ostream& operator<<(std::ostream& strm, const Token& token) {
