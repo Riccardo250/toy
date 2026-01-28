@@ -71,6 +71,8 @@ Token Token_stream::getInternal() {
         case '*':
         case '/':
         case '-':
+        case '{':
+        case '}':
             increasePos(1);
             return {static_cast<Kind>(istream.get()), {}, 0, oldTotalPos, oldLinePos, line};
         default:
@@ -104,12 +106,21 @@ std::ostream& operator<<(std::ostream& strm, const Token& token) {
         case Kind::end:
             strm << "end";
             break;
+        case Kind::function:
+            strm << "function";
+            break;
         default:
             strm << static_cast<char>(token.kind);
     }
 
+    if(Lexer::printPos) {
+        strm << "[" << "l:" << token.line << ", lp;" << token.linePos << ", tp:" << token.totalPos << "]";
+    }
+
     return strm;
 }
+
+bool Lexer::printPos = false;
 
 void Error::lexerError(const std::string& errorMsg) {
     std::cerr << errorMsg << "\n";

@@ -1,6 +1,10 @@
 #include<iostream>
 #include<string>
 
+
+#ifndef LEXER_H
+#define LEXER_H
+
 enum class Kind : char {
     number,
     name,
@@ -13,7 +17,9 @@ enum class Kind : char {
     equal='=',
     endOfStatement=';',
     lp='(',
-    rp=')'
+    rp=')',
+    lcb='{',
+    rcb='}'
 };
 
 
@@ -54,8 +60,13 @@ class Token_stream {
         void increasePos(unsigned int n);
 };
 
+namespace Lexer {
+   extern bool printPos;
+}
+
 namespace Error {
     void lexerError(const std::string& errorMsg);
 }
 
 std::ostream& operator<<(std::ostream& strm, const Token& token);
+#endif
