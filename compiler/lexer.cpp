@@ -34,7 +34,7 @@ Token Token_stream::getInternal() {
     char firstC = istream.peek();
 
     if(istream.eof()) {
-        return {Kind::end};
+        return {Kind::end, oldTotalPos, oldLinePos, line};
     }
 
     //number
@@ -44,7 +44,7 @@ Token Token_stream::getInternal() {
 
         // TODO: gcount returns type std::streamsize, can it be sagfely converted to unsigned int?
         increasePos(istream.gcount());
-        return {Kind::number, {}, num, oldTotalPos, oldLinePos, line};
+        return {Kind::number, num, oldTotalPos, oldLinePos, line};
     }
 
     //name
@@ -55,11 +55,15 @@ Token Token_stream::getInternal() {
         } while(isalpha(istream.peek()));
 
         increasePos(currString.length());
+
+        //types
+        if(currString == "int")
+            return {Kind::type, Type::integer, oldTotalPos, oldLinePos, line}; 
         
         if(currString == "function")
-            return {Kind::function, {}, 0, oldTotalPos, oldLinePos, line};
+            return {Kind::function, oldTotalPos, oldLinePos, line};
 
-        return {Kind::name, currString, 0, oldTotalPos, oldLinePos, line};
+        return {Kind::name, currString, oldTotalPos, oldLinePos, line};
     }
 
     switch(firstC) {
@@ -74,13 +78,13 @@ Token Token_stream::getInternal() {
         case '{':
         case '}':
             increasePos(1);
-            return {static_cast<Kind>(istream.get()), {}, 0, oldTotalPos, oldLinePos, line};
+            return {static_cast<Kind>(istream.get()), oldTotalPos, oldLinePos, line};
         default:
             Error::lexerError("Invalid token");
     }
 
     //default to make compiler happy
-    return {Kind::end};
+    return {Kind::error, oldTotalPos, oldLinePos, line};
 }
 
 void Token_stream::increaseLine() {

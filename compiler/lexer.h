@@ -10,6 +10,8 @@ enum class Kind : char {
     name,
     end,
     function,
+    type,
+    error,
     plus='+',
     minus='-',
     mul='*',
@@ -22,17 +24,28 @@ enum class Kind : char {
     rcb='}'
 };
 
+enum class Type : char {
+    integer
+};
 
-//maybe we can make this a class? And use polymorphism to get the different behaviors for the different kinds?
+
+// maybe we can make this a class? And use polymorphism to get the different behaviors for the different kinds?
 // but idk how I would implement the function to get the value (we cannot make one volatile function to override)
 // cause we couldn't override it properly (different return values type)
 struct Token {
-    Kind kind;
-    std::string name;
-    int value;
-    unsigned int totalPos;
-    unsigned int linePos;
-    unsigned int line;
+    Kind kind{};
+    std::string name{};
+    int value{};
+    Type type{};
+    unsigned int totalPos{};
+    unsigned int linePos{};
+    unsigned int line{};
+
+    Token(Kind kind, int totalPos, int linePos, int line) : kind{kind}, totalPos{totalPos}, line{line} {}
+    Token(Kind kind, std::string name, int totalPos, int linePos, int line) : kind{kind}, name{name}, totalPos{totalPos}, line{line} {}
+    Token(Kind kind, int value, int totalPos, int linePos, int line) : kind{kind}, value{value}, totalPos{totalPos}, line{line} {}
+    Token(Kind kind, Type type, int totalPos, int linePos, int line) : kind{kind}, type{type}, totalPos{totalPos}, line{line} {}
+
 };
 
 class Token_stream {
@@ -52,8 +65,8 @@ class Token_stream {
         unsigned int line = 0;
 
         std::istream& istream;
-        Token currentToken = {Kind::end};
-        Token nextToken = {Kind::end};
+        Token currentToken = {Kind::end, 0, 0, 0};
+        Token nextToken = {Kind::end, 0, 0, 0};
 
         Token getInternal();
         void increaseLine();
