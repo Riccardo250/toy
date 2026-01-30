@@ -1,18 +1,30 @@
 #include <string>
 #include <vector>
+#include <memory>
+#include "lexer.h"
 
 #ifndef AST_H
 #define AST_H
 
 class AbstractSyntaxtTree {
     public:
-        std::vector<struct Statement*> statementList;
+        std::vector<Statement*> statementList;
         std::string toJSONString();
 };
+
 
 class Statement {
     public:
         virtual std::string toJSONString() = 0;
+};
+
+class varDeclListStatement : public Statement {
+    std::vector<std::unique_ptr<VarDeclStatement>> varDeclList;
+};
+
+class VarDeclStatement : public Statement {
+    std::string name;
+    Type type;
 };
 
 class ExprStatement : public Statement {
