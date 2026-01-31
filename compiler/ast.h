@@ -19,9 +19,10 @@ class Statement {
 };
 
 class varDeclListStatement : public Statement {
-    std::vector<std::unique_ptr<VarDeclStatement>> varDeclList;
+    std::vector<std::unique_ptr<VarDeclStatement>> declList;
 };
 
+// i don't think i need it to derive from statement
 class VarDeclStatement : public Statement {
     std::string name;
     Type type;
