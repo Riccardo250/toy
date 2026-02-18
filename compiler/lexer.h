@@ -9,6 +9,7 @@ enum class Kind : char {
     number,
     name,
     end,
+    var,
     function,
     type,
     error,
@@ -17,6 +18,8 @@ enum class Kind : char {
     mul='*',
     div='/',
     equal='=',
+    column=':',
+    comma=',',
     endOfStatement=';',
     lp='(',
     rp=')',
@@ -41,10 +44,10 @@ struct Token {
     unsigned int linePos{};
     unsigned int line{};
 
-    Token(Kind kind, int totalPos, int linePos, int line) : kind{kind}, totalPos{totalPos}, line{line} {}
-    Token(Kind kind, std::string name, int totalPos, int linePos, int line) : kind{kind}, name{name}, totalPos{totalPos}, line{line} {}
-    Token(Kind kind, int value, int totalPos, int linePos, int line) : kind{kind}, value{value}, totalPos{totalPos}, line{line} {}
-    Token(Kind kind, Type type, int totalPos, int linePos, int line) : kind{kind}, type{type}, totalPos{totalPos}, line{line} {}
+    Token(Kind kind, unsigned int totalPos, unsigned int linePos, unsigned int line) : kind{kind}, totalPos{totalPos}, line{line} {}
+    Token(Kind kind, std::string name, unsigned int totalPos, unsigned int linePos, unsigned int line) : kind{kind}, name{name}, totalPos{totalPos}, line{line} {}
+    Token(Kind kind, int value, unsigned int totalPos, unsigned int linePos, unsigned int line) : kind{kind}, value{value}, totalPos{totalPos}, line{line} {}
+    Token(Kind kind, Type type, unsigned int totalPos, unsigned int linePos, unsigned int line) : kind{kind}, type{type}, totalPos{totalPos}, line{line} {}
 
 };
 
@@ -75,6 +78,7 @@ class Token_stream {
 
 namespace Lexer {
    extern bool printPos;
+   std::string typeToString(Type type);
 }
 
 namespace Error {

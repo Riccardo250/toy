@@ -1,6 +1,6 @@
 #include "ast.h"
+#include "lexer.h"
 #include <iostream>
-
 
 std::string AbstractSyntaxtTree::toJSONString() {
     std::string str{};
@@ -22,6 +22,37 @@ std::string AbstractSyntaxtTree::toJSONString() {
     return str;
 }
 
+std::string VarDecl::toJSONString() {
+    std::string str{};
+
+    str += "{";
+    str += "\"type\":\"VarDeclStatement\",";
+    str += "\"name\":\"" + name + "\",";
+    str += "\"type\":\"" + Lexer::typeToString(type)  + "\",";
+    str += "}";
+    return str;
+}
+
+std::string VarDeclListStatement::toJSONString() {
+    std::string str{};
+
+    str += "{";
+    str += "\"type\":\"varDeclListStatement\",";
+    str += "\"declarations\":";
+    str += "[";
+
+    if(declList.size() > 0) {
+        for(int i = 0; i < declList.size() - 1; i++) {
+            str += declList[i].toJSONString() + ",";
+        }
+        str += declList[declList.size() - 1].toJSONString();
+
+    }
+    str += "]";
+    str += "}";
+    return str;
+}
+
 std::string ExprStatement::toJSONString() {
     std::string str{};
 
@@ -32,13 +63,14 @@ std::string ExprStatement::toJSONString() {
     return str;
 }
 
+
 std::string AssExpr::toJSONString() {
     std::string str{};
 
     str += "{";
     str += "\"type\":\"AssExpr\",";
     str += "\"name\":" + name->toJSONString() + ",";
-    str += "\"expr\":" + expr->toJSONString();
+    str += "\"expr\":" + expr->toJSONString() + ",";
     str += "}";
     return str;
 }

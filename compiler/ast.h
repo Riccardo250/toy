@@ -6,32 +6,9 @@
 #ifndef AST_H
 #define AST_H
 
-class AbstractSyntaxtTree {
-    public:
-        std::vector<Statement*> statementList;
-        std::string toJSONString();
-};
-
-
 class Statement {
     public:
         virtual std::string toJSONString() = 0;
-};
-
-class varDeclListStatement : public Statement {
-    std::vector<std::unique_ptr<VarDeclStatement>> declList;
-};
-
-// i don't think i need it to derive from statement
-class VarDeclStatement : public Statement {
-    std::string name;
-    Type type;
-};
-
-class ExprStatement : public Statement {
-    public:
-        struct Expr* expr;
-        std::string toJSONString() override;
 };
 
 class Expr {
@@ -39,38 +16,63 @@ class Expr {
         virtual std::string toJSONString() = 0;
 };
 
+class VarDecl{
+    public:
+        std::string name;
+        Type type;
+        std::string toJSONString();
+};
+
+class AbstractSyntaxtTree {
+    public:
+        std::vector<std::unique_ptr<Statement>> statementList;
+        std::string toJSONString();
+};
+
+class VarDeclListStatement : public Statement {
+    public:
+        std::vector<VarDecl> declList;
+        std::string toJSONString() override;
+};
+
+class ExprStatement : public Statement {
+    public:
+        std::unique_ptr<Expr> expr;
+        std::string toJSONString() override;
+};
+
 class AssExpr : public Expr {
     public:
-        struct Expr* name;
-        struct Expr* expr;
+        std::unique_ptr<Expr> name;
+        std::unique_ptr<Expr> expr;
         std::string toJSONString() override;
 };
 
 class AddOpExpr : public Expr {
     public:
-        struct Expr* a;
-        struct Expr* b;
+        std::unique_ptr<Expr> a;
+        std::unique_ptr<Expr> b;
         std::string toJSONString() override;
 };
 
 class SubOpExpr : public Expr {
     public:
-        struct Expr* a;
-        struct Expr* b;
+        std::unique_ptr<Expr> a;
+        std::unique_ptr<Expr> b;
         std::string toJSONString() override;
 };
 
 class MulOpExpr : public Expr {
     public:
-        struct Expr* a;
-        struct Expr* b;
+        std::unique_ptr<Expr> a;
+        std::unique_ptr<Expr> b;
         std::string toJSONString() override;
 };
 
 class DivOpExpr : public Expr {
     public:
-        struct Expr* a;
-        struct Expr* b;
+        std::unique_ptr<Expr> a;
+        std::unique_ptr<Expr> b;
         std::string toJSONString() override;
 };
 
@@ -87,4 +89,5 @@ class ConstExpr : public Expr {
         ConstExpr(int number) : number{number} {}
         std::string toJSONString() override;
 };
+
 #endif

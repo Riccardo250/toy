@@ -11,15 +11,18 @@ class Parser {
 
         //productions
         AbstractSyntaxtTree start();
-        void statList(std::vector<Statement*>& statementList);
-        Statement* stat();
-        Expr* expr();
-        AssExpr* ass();
-        Expr* op();
-        Expr* addR(Expr * expr);
-        Expr* term();
-        Expr* mulR(Expr* expr);
-        Expr* factor();
+        void statList(std::vector<std::unique_ptr<Statement>>& statementList);
+        void varDeclList(std::unique_ptr<VarDeclListStatement>& variableDeclList);
+        void varDeclListR(std::unique_ptr<VarDeclListStatement>& variableDeclList);
+        std::unique_ptr<VarDeclListStatement> varDeclListWrapper();
+        std::unique_ptr<Statement> stat();
+        std::unique_ptr<Expr> expr(); 
+        std::unique_ptr<AssExpr> ass();
+        std::unique_ptr<Expr> op();
+        std::unique_ptr<Expr> addR(std::unique_ptr<Expr> expr);
+        std::unique_ptr<Expr> term();
+        std::unique_ptr<Expr> mulR(std::unique_ptr<Expr> expr);
+        std::unique_ptr<Expr> factor();
         void eat(Kind kind);
 };
 

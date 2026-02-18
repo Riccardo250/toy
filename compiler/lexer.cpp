@@ -47,7 +47,7 @@ Token Token_stream::getInternal() {
         return {Kind::number, num, oldTotalPos, oldLinePos, line};
     }
 
-    //name
+    //string
     if(isalpha(firstC)) {
         std::string currString = {};
         do {
@@ -57,18 +57,22 @@ Token Token_stream::getInternal() {
         increasePos(currString.length());
 
         //types
-        if(currString == "int")
+        if(currString == "int") {
             return {Kind::type, Type::integer, oldTotalPos, oldLinePos, line}; 
-        
-        if(currString == "function")
+        } else if(currString == "function") {
             return {Kind::function, oldTotalPos, oldLinePos, line};
-
+        } else if (currString == "var") {
+            return {Kind::var, oldTotalPos, oldLinePos, line};
+        }
+          
         return {Kind::name, currString, oldTotalPos, oldLinePos, line};
     }
 
     switch(firstC) {
         case '+':
         case '=':
+        case ',':
+        case ':':
         case ';':
         case '(':
         case ')':
@@ -113,6 +117,9 @@ std::ostream& operator<<(std::ostream& strm, const Token& token) {
         case Kind::function:
             strm << "function";
             break;
+        case Kind::var:
+            strm << "var";
+            break;
         default:
             strm << static_cast<char>(token.kind);
     }
@@ -125,6 +132,14 @@ std::ostream& operator<<(std::ostream& strm, const Token& token) {
 }
 
 bool Lexer::printPos = false;
+std::string Lexer::typeToString(Type type) {
+    switch(type) {
+        case Type::integer:
+            return "integer";
+        default:
+            return "unknown_type";
+    }
+}
 
 void Error::lexerError(const std::string& errorMsg) {
     std::cerr << errorMsg << "\n";
