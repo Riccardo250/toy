@@ -106,22 +106,13 @@ void Token_stream::increasePos(unsigned int n) {
 std::ostream& operator<<(std::ostream& strm, const Token& token) {
     switch(token.kind) {
         case Kind::number:
-            strm << "number" << "{" << token.value << "}";
+            strm << kindToString(token.kind) << "{" << token.value << "}";
             break;
         case Kind::name:
-            strm << "name" << "{" << token.name << "}";
-            break;
-        case Kind::end:
-            strm << "end";
-            break;
-        case Kind::function:
-            strm << "function";
-            break;
-        case Kind::var:
-            strm << "var";
+            strm << kindToString(token.kind) << "{" << token.name << "}";
             break;
         default:
-            strm << static_cast<char>(token.kind);
+            strm << kindToString(token.kind);
     }
 
     if(Lexer::printPos) {
@@ -129,6 +120,55 @@ std::ostream& operator<<(std::ostream& strm, const Token& token) {
     }
 
     return strm;
+}
+
+std::string kindToString(Kind kind) {
+    switch(kind) {
+        case Kind::number:
+            return "number";
+        case Kind::name:
+            return "name";
+        case Kind::end:
+            return "end";
+        case Kind::var:
+            return "var";
+        case Kind::function:
+            return "function";
+        case Kind::type:
+            return "type";
+        case Kind::error:
+            return "error";
+        case Kind::plus:
+            return "+";
+        case Kind::minus:
+            return "-";
+        case Kind::mul:
+            return "*";
+        case Kind::div:
+            return "/";
+        case Kind::equal:
+            return "=";
+        case Kind::column:
+            return ":";
+        case Kind::comma:
+            return ",";
+        case Kind::endOfStatement:
+            return ";";
+        case Kind::lp:
+            return "(";
+        case Kind::rp:
+            return ")";
+        case Kind::lcb:
+            return "{";                                                                                                
+        case Kind::rcb:
+            return "}"; 
+        default:
+            return "unknown_kind"; 
+    }
+}
+
+std::string operator+(std::string string, Kind kind) {
+    return string + kindToString(kind);
 }
 
 bool Lexer::printPos = false;

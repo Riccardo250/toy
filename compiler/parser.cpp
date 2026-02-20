@@ -72,6 +72,7 @@ std::unique_ptr<Statement> Parser::stat() {
 std::unique_ptr<VarDeclListStatement> Parser::varDeclListWrapper() {
     eat(Kind::var);
     std::unique_ptr<VarDeclListStatement> variableDeclList{new VarDeclListStatement{}};
+    varDeclList(variableDeclList);
     return variableDeclList;
 }
 
@@ -107,10 +108,10 @@ void Parser::varDeclListR(std::unique_ptr<VarDeclListStatement>& variableDeclLis
         eat(Kind::comma);
         varDeclList(variableDeclList);
         return;
-    } else if(tokenStream.current().kind == Kind::column) {
+    } else if(tokenStream.current().kind == Kind::endOfStatement) {
         return;
     } else {
-        Error::parseError("no valid production for var_decl_list_r", tokenStream.current());
+        Error::parseError("no valid production for var_decl_list_r, expected a , or a ;", tokenStream.current());
         return;
     }
 }
@@ -229,7 +230,8 @@ std::unique_ptr<Expr> Parser::factor() {
 //TODO: add "Expected token  to de message". I would like to create a function to stringify the token and append it to 
 // a string
 void Parser::eat(Kind kind) {
-    if(tokenStream.current().kind != kind) Error::parseError("eat error", tokenStream.current());
+    std::cout << "Eating: " + kind + "\n";
+    if(tokenStream.current().kind != kind) Error::parseError("eat error, expected: " + kind, tokenStream.current());
     tokenStream.get();
 }
 

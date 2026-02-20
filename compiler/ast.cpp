@@ -28,7 +28,7 @@ std::string VarDecl::toJSONString() {
     str += "{";
     str += "\"type\":\"VarDeclStatement\",";
     str += "\"name\":\"" + name + "\",";
-    str += "\"type\":\"" + Lexer::typeToString(type)  + "\",";
+    str += "\"t\":\"" + Lexer::typeToString(type) +"\"";
     str += "}";
     return str;
 }
@@ -70,7 +70,7 @@ std::string AssExpr::toJSONString() {
     str += "{";
     str += "\"type\":\"AssExpr\",";
     str += "\"name\":" + name->toJSONString() + ",";
-    str += "\"expr\":" + expr->toJSONString() + ",";
+    str += "\"expr\":" + expr->toJSONString();
     str += "}";
     return str;
 }

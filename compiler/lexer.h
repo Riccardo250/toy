@@ -48,7 +48,6 @@ struct Token {
     Token(Kind kind, std::string name, unsigned int totalPos, unsigned int linePos, unsigned int line) : kind{kind}, name{name}, totalPos{totalPos}, line{line} {}
     Token(Kind kind, int value, unsigned int totalPos, unsigned int linePos, unsigned int line) : kind{kind}, value{value}, totalPos{totalPos}, line{line} {}
     Token(Kind kind, Type type, unsigned int totalPos, unsigned int linePos, unsigned int line) : kind{kind}, type{type}, totalPos{totalPos}, line{line} {}
-
 };
 
 class Token_stream {
@@ -85,5 +84,7 @@ namespace Error {
     void lexerError(const std::string& errorMsg);
 }
 
+std::string kindToString(Kind kind);
+std::string operator+(std::string string, Kind kind);
 std::ostream& operator<<(std::ostream& strm, const Token& token);
 #endif
