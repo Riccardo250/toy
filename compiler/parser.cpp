@@ -37,6 +37,7 @@ void Parser::statList(std::vector<std::unique_ptr<Statement>>& statementList) {
         case Kind::number:
         case Kind::var:
         case Kind::function:
+        case Kind::ifKind:
             statementList.push_back(stat());
             statList(statementList);
             return;  
@@ -198,10 +199,17 @@ void Parser::IfR(std::vector<std::unique_ptr<Statement>>& elseBody) {
         statList(elseBody);
         eat(Kind::rcb);
         return;
-    } else if() {
+    } else if(tokenStream.current().kind == Kind::lp
+            || tokenStream.current().kind == Kind::end
+            || tokenStream.current().kind == Kind::function
+            || tokenStream.current().kind == Kind::ifKind
+            || tokenStream.current().kind == Kind::name
+            || tokenStream.current().kind == Kind::number
+            || tokenStream.current().kind == Kind::var
+            || tokenStream.current().kind == Kind::rcb) {
         return;
     } else {
-        Error::parseError(, tokenStream.current());
+        Error::parseError("no valid production for if_stat_r, expected else, else if, (, end, function, if, name, number, var, }", tokenStream.current());
         return;
     }
 }

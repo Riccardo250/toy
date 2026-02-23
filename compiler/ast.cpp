@@ -92,6 +92,44 @@ std::string FunDefStatement::toJSONString() {
 
 }
 
+std::string IfStatement::toJSONString () {
+    std::string str{};
+
+    str += "{";
+    str += "\"type\":\"IfStatement\",";
+
+    str += "\"condition\":" + condition->toJSONString() + ",";
+
+    str += "\"thenBody\":";
+    str += "[";
+
+    if(thenBody.size() > 0) {
+        for(int i = 0; i < thenBody.size() - 1; i++) {
+            str += thenBody[i]->toJSONString() + ",";
+        }
+        str += thenBody[thenBody.size() - 1]->toJSONString();
+
+    }
+    str += "],";
+
+    str += "\"elseBody\":";
+    str += "[";
+
+    if(elseBody.size() > 0) {
+        for(int i = 0; i < elseBody.size() - 1; i++) {
+            str += elseBody[i]->toJSONString() + ",";
+        }
+        str += elseBody[elseBody.size() - 1]->toJSONString();
+
+    }
+    str += "]";
+
+
+
+    str += "}";
+    return str;
+}
+
 std::string ExprStatement::toJSONString() {
     std::string str{};
 
