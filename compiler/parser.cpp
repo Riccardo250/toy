@@ -39,6 +39,8 @@ void Parser::statList(std::vector<std::unique_ptr<Statement>>& statementList) {
         case Kind::function:
         case Kind::ifKind:
         case Kind::whileKind:
+        case Kind::breakKind:
+        case Kind::returnKind:
             statementList.push_back(stat());
             statList(statementList);
             return;  
@@ -120,6 +122,20 @@ std::unique_ptr<Statement> Parser::stat() {
             eat(Kind::rcb);
 
             return whileStatement;
+        }
+        case Kind::breakKind:
+        {
+            eat(Kind::breakKind);
+            eat(Kind::endOfStatement);
+            return std::unique_ptr<BreakStatement>{new BreakStatement()};
+        }
+        case Kind::returnKind:
+        {
+            eat(Kind::returnKind);
+            std::unique_ptr<ReturnStatement> returnStatement{new ReturnStatement()};
+            returnStatement->expr = expr();
+            eat(Kind::endOfStatement);
+            return returnStatement;
         }
         default:
             Error::parseError("no valid production for stat", tokenStream.current());
@@ -224,7 +240,9 @@ void Parser::ifParserR(std::vector<std::unique_ptr<Statement>>& elseBody) {
             || tokenStream.current().kind == Kind::number
             || tokenStream.current().kind == Kind::var
             || tokenStream.current().kind == Kind::rcb
-            || tokenStream.current().kind == Kind::whileKind) {
+            || tokenStream.current().kind == Kind::whileKind
+            || tokenStream.current().kind == Kind::breakKind
+            || tokenStream.current().kind == Kind::returnKind) {
         return;
     } else {
         Error::parseError("no valid production for if_stat_r, expected else, else if, ( end function if name number var while }", tokenStream.current());
@@ -234,7 +252,7 @@ void Parser::ifParserR(std::vector<std::unique_ptr<Statement>>& elseBody) {
 
 std::unique_ptr<Expr> Parser::expr() {
     if(tokenStream.current().kind == Kind::name 
-        && tokenStream.next().kind == Kind::equal) {
+        && tokenStream.next().kind == Kind::assign) {
         return ass();
     } else if(tokenStream.current().kind == Kind::lp 
             || tokenStream.current().kind == Kind::name 
@@ -251,7 +269,7 @@ std::unique_ptr<AssExpr> Parser::ass() {
         std::unique_ptr<AssExpr>  assExpr{new AssExpr()};
         assExpr->name = std::unique_ptr<NameExpr>{new NameExpr{tokenStream.current().name}};
         eat(Kind::name);
-        eat(Kind::equal);
+        eat(Kind::assign);
         assExpr->expr = expr();
         return assExpr;
     } else {

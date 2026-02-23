@@ -59,6 +59,17 @@ class WhileStatement : public Statement {
         std::string toJSONString() override;
 };
 
+class BreakStatement : public Statement {
+    public:
+        std::string toJSONString() override;
+};
+
+class ReturnStatement : public Statement {
+    public:
+        std::unique_ptr<Expr> expr;
+        std::string toJSONString() override;
+};
+
 class ExprStatement : public Statement {
     public:
         std::unique_ptr<Expr> expr;

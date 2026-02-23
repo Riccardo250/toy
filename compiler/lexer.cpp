@@ -69,6 +69,10 @@ Token Token_stream::getInternal() {
             return {Kind::elseKind, oldTotalPos, oldLinePos, line};
         } else if (currString == "while") {
             return {Kind::whileKind, oldTotalPos, oldLinePos, line};
+        } else if (currString == "break") {
+            return {Kind::breakKind, oldTotalPos, oldLinePos, line};
+        } else if (currString == "return") {
+            return {Kind::returnKind, oldTotalPos, oldLinePos, line};
         } 
           
         return {Kind::name, currString, oldTotalPos, oldLinePos, line};
@@ -158,7 +162,7 @@ std::string kindToString(Kind kind) {
             return "*";
         case Kind::div:
             return "/";
-        case Kind::equal:
+        case Kind::assign:
             return "=";
         case Kind::column:
             return ":";

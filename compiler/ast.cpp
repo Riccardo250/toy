@@ -124,8 +124,6 @@ std::string IfStatement::toJSONString () {
     }
     str += "]";
 
-
-
     str += "}";
     return str;
 }
@@ -150,6 +148,25 @@ std::string WhileStatement::toJSONString () {
     }
     str += "]";
 
+    str += "}";
+    return str;
+}
+
+std::string BreakStatement::toJSONString() {
+    std::string str{};
+
+    str += "{";
+    str += "\"type\":\"BreakStatement\"";
+    str += "}";
+    return str;
+}
+
+std::string ReturnStatement::toJSONString() {
+    std::string str{};
+
+    str += "{";
+    str += "\"type\":\"ReturnStatement\",";
+    str += "\"expr\":" + expr->toJSONString();
     str += "}";
     return str;
 }
