@@ -14,6 +14,7 @@ enum class Kind : char {
     type,
     ifKind,
     elseKind,
+    whileKind,
     error,
     plus='+',
     minus='-',

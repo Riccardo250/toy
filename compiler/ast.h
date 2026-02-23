@@ -52,6 +52,13 @@ class IfStatement : public Statement {
         std::string toJSONString() override;
 };
 
+class WhileStatement : public Statement {
+    public:
+        std::unique_ptr<Expr> condition;
+        std::vector<std::unique_ptr<Statement>> body;
+        std::string toJSONString() override;
+};
+
 class ExprStatement : public Statement {
     public:
         std::unique_ptr<Expr> expr;

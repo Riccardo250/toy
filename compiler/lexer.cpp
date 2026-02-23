@@ -67,6 +67,8 @@ Token Token_stream::getInternal() {
             return {Kind::ifKind, oldTotalPos, oldLinePos, line};
         } else if (currString == "else") {
             return {Kind::elseKind, oldTotalPos, oldLinePos, line};
+        } else if (currString == "while") {
+            return {Kind::whileKind, oldTotalPos, oldLinePos, line};
         } 
           
         return {Kind::name, currString, oldTotalPos, oldLinePos, line};
@@ -144,6 +146,8 @@ std::string kindToString(Kind kind) {
             return "if";
         case Kind::elseKind:
             return "else";
+        case Kind::whileKind:
+            return "while";
         case Kind::error:
             return "error";
         case Kind::plus:

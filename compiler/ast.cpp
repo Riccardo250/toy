@@ -130,6 +130,30 @@ std::string IfStatement::toJSONString () {
     return str;
 }
 
+std::string WhileStatement::toJSONString () {
+    std::string str{};
+
+    str += "{";
+    str += "\"type\":\"WhileStatement\",";
+
+    str += "\"condition\":" + condition->toJSONString() + ",";
+
+    str += "\"body\":";
+    str += "[";
+
+    if(body.size() > 0) {
+        for(int i = 0; i < body.size() - 1; i++) {
+            str += body[i]->toJSONString() + ",";
+        }
+        str += body[body.size() - 1]->toJSONString();
+
+    }
+    str += "]";
+
+    str += "}";
+    return str;
+}
+
 std::string ExprStatement::toJSONString() {
     std::string str{};
 

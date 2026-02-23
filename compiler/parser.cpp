@@ -38,6 +38,7 @@ void Parser::statList(std::vector<std::unique_ptr<Statement>>& statementList) {
         case Kind::var:
         case Kind::function:
         case Kind::ifKind:
+        case Kind::whileKind:
             statementList.push_back(stat());
             statList(statementList);
             return;  
@@ -102,7 +103,23 @@ std::unique_ptr<Statement> Parser::stat() {
         }
         case Kind::ifKind:
         {
-            return If();
+            return ifParser();
+        }
+
+        case Kind::whileKind:
+        {
+            std::unique_ptr<WhileStatement> whileStatement{new WhileStatement()};
+
+            eat(Kind::whileKind);
+            eat(Kind::lp);
+            whileStatement->condition = expr();
+            eat(Kind::rp);
+
+            eat(Kind::lcb);
+            statList(whileStatement->body);
+            eat(Kind::rcb);
+
+            return whileStatement;
         }
         default:
             Error::parseError("no valid production for stat", tokenStream.current());
@@ -171,7 +188,7 @@ std::vector<VarDecl> Parser::funArgumentList() {
     }
 }
 
-std::unique_ptr<IfStatement> Parser::If() {
+std::unique_ptr<IfStatement> Parser::ifParser() {
     std::unique_ptr<IfStatement> ifStatement{new IfStatement()};
 
     eat(Kind::ifKind);
@@ -183,15 +200,15 @@ std::unique_ptr<IfStatement> Parser::If() {
     statList(ifStatement->thenBody);
     eat(Kind::rcb);
 
-    IfR(ifStatement->elseBody);
+    ifParserR(ifStatement->elseBody);
 
     return ifStatement;
 }
 
-void Parser::IfR(std::vector<std::unique_ptr<Statement>>& elseBody) {
+void Parser::ifParserR(std::vector<std::unique_ptr<Statement>>& elseBody) {
     if(tokenStream.current().kind == Kind::elseKind && tokenStream.next().kind == Kind::ifKind) {
         eat(Kind::elseKind);
-        elseBody.push_back(If());
+        elseBody.push_back(ifParser());
         return;
     } else if(tokenStream.current().kind == Kind::elseKind) {
         eat(Kind::elseKind);
@@ -206,10 +223,11 @@ void Parser::IfR(std::vector<std::unique_ptr<Statement>>& elseBody) {
             || tokenStream.current().kind == Kind::name
             || tokenStream.current().kind == Kind::number
             || tokenStream.current().kind == Kind::var
-            || tokenStream.current().kind == Kind::rcb) {
+            || tokenStream.current().kind == Kind::rcb
+            || tokenStream.current().kind == Kind::whileKind) {
         return;
     } else {
-        Error::parseError("no valid production for if_stat_r, expected else, else if, (, end, function, if, name, number, var, }", tokenStream.current());
+        Error::parseError("no valid production for if_stat_r, expected else, else if, ( end function if name number var while }", tokenStream.current());
         return;
     }
 }
