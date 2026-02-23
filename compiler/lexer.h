@@ -12,6 +12,8 @@ enum class Kind : char {
     var,
     function,
     type,
+    ifKind,
+    elseKind,
     error,
     plus='+',
     minus='-',

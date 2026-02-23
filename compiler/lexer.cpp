@@ -63,7 +63,11 @@ Token Token_stream::getInternal() {
             return {Kind::function, oldTotalPos, oldLinePos, line};
         } else if (currString == "var") {
             return {Kind::var, oldTotalPos, oldLinePos, line};
-        }
+        } else if (currString == "if") {
+            return {Kind::ifKind, oldTotalPos, oldLinePos, line};
+        } else if (currString == "else") {
+            return {Kind::elseKind, oldTotalPos, oldLinePos, line};
+        } 
           
         return {Kind::name, currString, oldTotalPos, oldLinePos, line};
     }
@@ -136,6 +140,10 @@ std::string kindToString(Kind kind) {
             return "function";
         case Kind::type:
             return "type";
+        case Kind::ifKind:
+            return "if";
+        case Kind::elseKind:
+            return "else";
         case Kind::error:
             return "error";
         case Kind::plus:

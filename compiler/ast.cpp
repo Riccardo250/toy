@@ -37,7 +37,7 @@ std::string VarDeclListStatement::toJSONString() {
     std::string str{};
 
     str += "{";
-    str += "\"type\":\"varDeclListStatement\",";
+    str += "\"type\":\"VarDeclListStatement\",";
     str += "\"declarations\":";
     str += "[";
 
@@ -51,6 +51,45 @@ std::string VarDeclListStatement::toJSONString() {
     str += "]";
     str += "}";
     return str;
+}
+
+std::string FunDefStatement::toJSONString() {
+    std::string str{};
+
+    str += "{";
+    str += "\"type\":\"FunDefStatement\",";
+
+    str += "\"name\":\"" + name + "\",";
+
+    str += "\"returnType\":\"" + Lexer::typeToString(returnType) +"\",";
+
+    str += "\"arguments\":";
+    str += "[";
+
+    if(arguments.size() > 0) {
+        for(int i = 0; i < arguments.size() - 1; i++) {
+            str += arguments[i].toJSONString() + ",";
+        }
+        str += arguments[arguments.size() - 1].toJSONString();
+
+    }
+    str += "],";
+
+    str += "\"body\":";
+    str += "[";
+
+    if(body.size() > 0) {
+        for(int i = 0; i < body.size() - 1; i++) {
+            str += body[i]->toJSONString() + ",";
+        }
+        str += body[body.size() - 1]->toJSONString();
+
+    }
+    str += "]";
+
+    str += "}";
+    return str;
+
 }
 
 std::string ExprStatement::toJSONString() {

@@ -12,8 +12,11 @@ class Parser {
         //productions
         AbstractSyntaxtTree start();
         void statList(std::vector<std::unique_ptr<Statement>>& statementList);
-        void varDeclList(std::unique_ptr<VarDeclListStatement>& variableDeclList);
-        void varDeclListR(std::unique_ptr<VarDeclListStatement>& variableDeclList);
+        void varDeclList(std::vector<VarDecl>& declList);
+        void varDeclListR(std::vector<VarDecl>& declList);
+        std::vector<VarDecl> funArgumentList();
+        std::unique_ptr<IfStatement> If();
+        void IfR(std::vector<std::unique_ptr<Statement>>& elseBody);
         std::unique_ptr<VarDeclListStatement> varDeclListWrapper();
         std::unique_ptr<Statement> stat();
         std::unique_ptr<Expr> expr(); 

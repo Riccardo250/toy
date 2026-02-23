@@ -17,6 +17,7 @@ AbstractSyntaxtTree Parser::start() {
         case Kind::name:
         case Kind::number:
         case Kind::var:
+        case Kind::function:
             statList(statementList); break;
         case Kind::end:
             eat(Kind::end); break;
@@ -35,10 +36,12 @@ void Parser::statList(std::vector<std::unique_ptr<Statement>>& statementList) {
         case Kind::name:
         case Kind::number:
         case Kind::var:
+        case Kind::function:
             statementList.push_back(stat());
             statList(statementList);
             return;  
         case Kind::end:
+        case Kind::rcb:
             return;      
         default:
             Error::parseError("no valid production for stat_list", tokenStream.current());
@@ -63,6 +66,43 @@ std::unique_ptr<Statement> Parser::stat() {
             eat(Kind::endOfStatement);
             return variableDeclList;
         }
+        case Kind::function:
+        {
+            std::unique_ptr<FunDefStatement> funDef{new FunDefStatement()};
+            eat(Kind::function);
+
+            if(tokenStream.current().kind == Kind::name) {
+                funDef->name = tokenStream.current().name;
+                eat(Kind::name);
+            } else {
+                Error::parseError("var_decl_list: expected name", tokenStream.current());
+                return nullptr;
+            }
+
+            eat(Kind::lp);
+            funDef->arguments = funArgumentList();
+            eat(Kind::rp);
+
+            eat(Kind::column);
+
+            if(tokenStream.current().kind == Kind::type) {
+                funDef->returnType = tokenStream.current().type;
+                eat(Kind::type);
+            } else {
+                Error::parseError("var_decl_list: expected type", tokenStream.current());
+                return nullptr;
+            }
+
+            eat(Kind::lcb);
+            statList(funDef->body);
+            eat(Kind::rcb);
+
+            return funDef;
+        }
+        case Kind::ifKind:
+        {
+            return If();
+        }
         default:
             Error::parseError("no valid production for stat", tokenStream.current());
             return nullptr;
@@ -72,11 +112,11 @@ std::unique_ptr<Statement> Parser::stat() {
 std::unique_ptr<VarDeclListStatement> Parser::varDeclListWrapper() {
     eat(Kind::var);
     std::unique_ptr<VarDeclListStatement> variableDeclList{new VarDeclListStatement{}};
-    varDeclList(variableDeclList);
+    varDeclList(variableDeclList->declList);
     return variableDeclList;
 }
 
-void Parser::varDeclList(std::unique_ptr<VarDeclListStatement>& variableDeclList) {
+void Parser::varDeclList(std::vector<VarDecl>& declList) {
     std::string name{};
     Type type{};
 
@@ -98,20 +138,70 @@ void Parser::varDeclList(std::unique_ptr<VarDeclListStatement>& variableDeclList
         return;
     }
     
-    variableDeclList->declList.push_back(VarDecl{name, type});
+    declList.push_back(VarDecl{name, type});
 
-    varDeclListR(variableDeclList);
+    varDeclListR(declList);
 }
 
-void Parser::varDeclListR(std::unique_ptr<VarDeclListStatement>& variableDeclList){
+void Parser::varDeclListR(std::vector<VarDecl>& declList){
     if(tokenStream.current().kind == Kind::comma) {
         eat(Kind::comma);
-        varDeclList(variableDeclList);
+        varDeclList(declList);
         return;
-    } else if(tokenStream.current().kind == Kind::endOfStatement) {
+    } else if(tokenStream.current().kind == Kind::endOfStatement || tokenStream.current().kind == Kind::rp) {
         return;
     } else {
-        Error::parseError("no valid production for var_decl_list_r, expected a , or a ;", tokenStream.current());
+        Error::parseError("no valid production for var_decl_list_r, expected a , a ; or a )", tokenStream.current());
+        return;
+    }
+}
+
+std::vector<VarDecl> Parser::funArgumentList() {
+    std::vector<VarDecl> arguments{};
+
+    if(tokenStream.current().kind == Kind::name) {
+        varDeclList(arguments);
+        return arguments;
+    } else if (tokenStream.current().kind == Kind::rp) {
+        return arguments;
+    } else {
+        Error::parseError("no valid production for fun_argument_list, expected name or a )", tokenStream.current());
+        return arguments;
+    }
+}
+
+std::unique_ptr<IfStatement> Parser::If() {
+    std::unique_ptr<IfStatement> ifStatement{new IfStatement()};
+
+    eat(Kind::ifKind);
+    eat(Kind::lp);
+    ifStatement->condition = expr();
+    eat(Kind::rp);
+
+    eat(Kind::lcb);
+    statList(ifStatement->thenBody);
+    eat(Kind::rcb);
+
+    IfR(ifStatement->elseBody);
+
+    return ifStatement;
+}
+
+void Parser::IfR(std::vector<std::unique_ptr<Statement>>& elseBody) {
+    if(tokenStream.current().kind == Kind::elseKind && tokenStream.next().kind == Kind::ifKind) {
+        eat(Kind::elseKind);
+        elseBody.push_back(If());
+        return;
+    } else if(tokenStream.current().kind == Kind::elseKind) {
+        eat(Kind::elseKind);
+        eat(Kind::lcb);
+        statList(elseBody);
+        eat(Kind::rcb);
+        return;
+    } else if() {
+        return;
+    } else {
+        Error::parseError(, tokenStream.current());
         return;
     }
 }
@@ -227,8 +317,6 @@ std::unique_ptr<Expr> Parser::factor() {
     }
 }
 
-//TODO: add "Expected token  to de message". I would like to create a function to stringify the token and append it to 
-// a string
 void Parser::eat(Kind kind) {
     std::cout << "Eating: " + kind + "\n";
     if(tokenStream.current().kind != kind) Error::parseError("eat error, expected: " + kind, tokenStream.current());

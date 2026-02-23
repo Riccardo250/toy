@@ -35,6 +35,23 @@ class VarDeclListStatement : public Statement {
         std::string toJSONString() override;
 };
 
+class FunDefStatement : public Statement {
+    public:
+        std::string name;
+        Type returnType;
+        std::vector<VarDecl> arguments;
+        std::vector<std::unique_ptr<Statement>> body;
+        std::string toJSONString() override;
+};
+
+class IfStatement : public Statement {
+    public:
+        std::unique_ptr<Expr> condition;
+        std::vector<std::unique_ptr<Statement>> thenBody;
+        std::vector<std::unique_ptr<Statement>> elseBody;
+        std::string toJSONString() override;
+};
+
 class ExprStatement : public Statement {
     public:
         std::unique_ptr<Expr> expr;
