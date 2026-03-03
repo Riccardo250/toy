@@ -21,6 +21,16 @@ class Parser {
         std::unique_ptr<Statement> stat();
         std::unique_ptr<Expr> expr(); 
         std::unique_ptr<AssExpr> ass();
+        std::unique_ptr<Expr> logicOp();
+        std::unique_ptr<Expr> logicOrR(std::unique_ptr<Expr> expr);
+        std::unique_ptr<Expr> logicTerm();
+        std::unique_ptr<Expr> logicAndR(std::unique_ptr<Expr> expr);
+        std::unique_ptr<Expr> logicFactor();
+        std::unique_ptr<Expr> bitwiseOrR(std::unique_ptr<Expr> expr);
+        std::unique_ptr<Expr> binaryTerm();
+        std::unique_ptr<Expr> bitwiseAndR(std::unique_ptr<Expr> expr);
+        std::unique_ptr<Expr> comp();
+        std::unique_ptr<Expr> compOpR(std::unique_ptr<Expr> expr);
         std::unique_ptr<Expr> op();
         std::unique_ptr<Expr> addR(std::unique_ptr<Expr> expr);
         std::unique_ptr<Expr> term();

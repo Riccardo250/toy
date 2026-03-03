@@ -181,7 +181,6 @@ std::string ExprStatement::toJSONString() {
     return str;
 }
 
-
 std::string AssExpr::toJSONString() {
     std::string str{};
 
@@ -193,46 +192,14 @@ std::string AssExpr::toJSONString() {
     return str;
 }
 
-std::string AddOpExpr::toJSONString() {
+std::string BinaryOpExpr::toJSONString() {
     std::string str{};
 
     str += "{";
     str += "\"type\":\"AddOpExpr\",";
     str += "\"a\":" + a->toJSONString() + ",";
-    str += "\"b\":" + b->toJSONString();
-    str += "}";
-    return str;
-}
-
-std::string SubOpExpr::toJSONString() {
-    std::string str{};
-
-    str += "{";
-    str += "\"type\":\"SubOpExpr\",";
-    str += "\"a\":" + a->toJSONString() + ",";
-    str += "\"b\":" + b->toJSONString();
-    str += "}";
-    return str;
-}
-
-std::string MulOpExpr::toJSONString() {
-    std::string str{};
-
-    str += "{";
-    str += "\"type\":\"MulOpExpr\",";
-    str += "\"a\":" + a->toJSONString() + ",";
-    str += "\"b\":" + b->toJSONString();
-    str += "}";
-    return str;
-}
-
-std::string DivOpExpr::toJSONString() {
-    std::string str{};
-
-    str += "{";
-    str += "\"type\":\"DivOpExpr\"";
-    str += "\"a\":" + a->toJSONString() + ",";
-    str += "\"b\":" + b->toJSONString();
+    str += "\"b\":" + b->toJSONString() + ",";
+    str += "\"op\":" + binaryOpTypeToString(op);
     str += "}";
     return str;
 }
@@ -255,4 +222,39 @@ std::string ConstExpr::toJSONString() {
     str += "\"number\":\"" + std::to_string(number) + "\"";
     str += "}";
     return str;
+}
+
+std::string binaryOpTypeToString(BinaryOpType type) {
+    switch(type) {
+        case BinaryOpType::add:
+            return "add";
+        case BinaryOpType::sub:
+            return "sub";
+        case BinaryOpType::mul:
+            return "mul";
+        case BinaryOpType::div:
+            return "div";
+        case BinaryOpType::equal:
+            return "equal";
+        case BinaryOpType::notEqual:
+            return "notEqual";
+        case BinaryOpType::greater:
+            return "greater";
+        case BinaryOpType::greaterEqual:
+            return "greaterEqual";
+        case BinaryOpType::less:
+            return "less";
+        case BinaryOpType::lessEqual:
+            return "lessEqual";
+        case BinaryOpType::logicOr:
+            return "logicOr";
+        case BinaryOpType::logicAnd:
+            return "logicAnd";
+        case BinaryOpType::bitwiseOr:
+            return "bitwiseOr";
+        case BinaryOpType::bitwiseAnd:
+            return "bitwiseAnd";
+        default:
+            return "unknown_binaryOp";
+    }
 }

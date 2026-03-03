@@ -74,13 +74,71 @@ Token Token_stream::getInternal() {
         } else if (currString == "return") {
             return {Kind::returnKind, oldTotalPos, oldLinePos, line};
         } 
-          
         return {Kind::name, currString, oldTotalPos, oldLinePos, line};
     }
 
     switch(firstC) {
-        case '+':
         case '=':
+            istream.ignore();
+            if(istream.peek() == '=') {
+                istream.ignore();
+                increasePos(2);
+                return {Kind::equal, oldTotalPos, oldLinePos, line};
+            } else {
+                increasePos(1);
+                return {Kind::assign, oldTotalPos, oldLinePos, line};
+            }
+        case '!':
+            istream.ignore();
+            if(istream.peek() == '=') {
+                istream.ignore();
+                increasePos(2);
+                return {Kind::notEqual, oldTotalPos, oldLinePos, line};
+            } else {
+                increasePos(1);
+                return {Kind::notKind, oldTotalPos, oldLinePos, line};
+            }
+        case '>':
+            istream.ignore();
+            if(istream.peek() == '=') {
+                istream.ignore();
+                increasePos(2);
+                return {Kind::greaterEqual, oldTotalPos, oldLinePos, line};
+            } else {
+                increasePos(1);
+                return {Kind::greater, oldTotalPos, oldLinePos, line};
+            }
+        case '<':
+            istream.ignore();
+            if(istream.peek() == '=') {
+                istream.ignore();
+                increasePos(2);
+                return {Kind::lessEqual, oldTotalPos, oldLinePos, line};
+            } else {
+                increasePos(1);
+                return {Kind::less, oldTotalPos, oldLinePos, line};
+            }
+        case '|':
+            istream.ignore();
+            if(istream.peek() == '|') {
+                istream.ignore();
+                increasePos(2);
+                return {Kind::orKind, oldTotalPos, oldLinePos, line};
+            } else {
+                increasePos(1);
+                return {Kind::bitwiseOr, oldTotalPos, oldLinePos, line};
+            }
+        case '&':
+            istream.ignore();
+            if(istream.peek() == '&') {
+                istream.ignore();
+                increasePos(2);
+                return {Kind::andKind, oldTotalPos, oldLinePos, line};
+            } else {
+                increasePos(1);
+                return {Kind::bitwiseAnd, oldTotalPos, oldLinePos, line};
+            }
+        case '+':
         case ',':
         case ':':
         case ';':
@@ -154,6 +212,28 @@ std::string kindToString(Kind kind) {
             return "while";
         case Kind::error:
             return "error";
+        case Kind::equal:
+            return "==";
+        case Kind::notEqual:
+            return "!=";
+        case Kind::greaterEqual:
+            return ">=";
+        case Kind::lessEqual:
+            return "<=";
+        case Kind::orKind:
+            return "||";
+        case Kind::andKind:
+            return "&&";
+        case Kind::notKind:
+            return "!";
+        case Kind::greater:
+            return ">";
+        case Kind::bitwiseOr:
+            return "|";
+        case Kind::bitwiseAnd:
+            return "&";
+        case Kind::less:
+            return "<";
         case Kind::plus:
             return "+";
         case Kind::minus:

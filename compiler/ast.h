@@ -6,6 +6,23 @@
 #ifndef AST_H
 #define AST_H
 
+enum class BinaryOpType : char {
+    add,
+    sub,
+    mul,
+    div,
+    equal,
+    notEqual,
+    greater,
+    greaterEqual,
+    less,
+    lessEqual,
+    logicOr,
+    logicAnd,
+    bitwiseOr,
+    bitwiseAnd
+};
+
 class Statement {
     public:
         virtual std::string toJSONString() = 0;
@@ -83,31 +100,11 @@ class AssExpr : public Expr {
         std::string toJSONString() override;
 };
 
-class AddOpExpr : public Expr {
-    public:
+class BinaryOpExpr : public Expr {
+    public: 
         std::unique_ptr<Expr> a;
         std::unique_ptr<Expr> b;
-        std::string toJSONString() override;
-};
-
-class SubOpExpr : public Expr {
-    public:
-        std::unique_ptr<Expr> a;
-        std::unique_ptr<Expr> b;
-        std::string toJSONString() override;
-};
-
-class MulOpExpr : public Expr {
-    public:
-        std::unique_ptr<Expr> a;
-        std::unique_ptr<Expr> b;
-        std::string toJSONString() override;
-};
-
-class DivOpExpr : public Expr {
-    public:
-        std::unique_ptr<Expr> a;
-        std::unique_ptr<Expr> b;
+        BinaryOpType op;
         std::string toJSONString() override;
 };
 
@@ -124,5 +121,7 @@ class ConstExpr : public Expr {
         ConstExpr(int number) : number{number} {}
         std::string toJSONString() override;
 };
+
+std::string binaryOpTypeToString(BinaryOpType type);
 
 #endif
