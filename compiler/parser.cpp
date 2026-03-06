@@ -293,7 +293,7 @@ std::unique_ptr<Expr> Parser::logicOrR(std::unique_ptr<Expr> expr) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::orKind);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = logicTerm();
         binaryOpExpr->op = BinaryOpType::logicOr;
         return logicOrR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::rp 
@@ -307,7 +307,7 @@ std::unique_ptr<Expr> Parser::logicOrR(std::unique_ptr<Expr> expr) {
 
 std::unique_ptr<Expr> Parser::logicTerm() {
     if(tokenStream.current().kind == Kind::lp || tokenStream.current().kind == Kind::name || tokenStream.current().kind == Kind::number) {
-        return logicAndR(logicFactor());
+        return logicAndR(comp());
     } else {
         Error::parseError("no valid production for logic_term", tokenStream.current());
         return nullptr;
@@ -319,9 +319,9 @@ std::unique_ptr<Expr> Parser::logicAndR(std::unique_ptr<Expr> expr) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::andKind);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = comp();
         binaryOpExpr->op = BinaryOpType::logicAnd;
-        return logicOrR(std::move(binaryOpExpr));
+        return logicAndR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::rp 
             || tokenStream.current().kind == Kind::endOfStatement
             || tokenStream.current().kind == Kind::orKind){
@@ -342,17 +342,23 @@ std::unique_ptr<Expr> Parser::logicFactor() {
 }
 
 std::unique_ptr<Expr> Parser::bitwiseOrR(std::unique_ptr<Expr> expr) {
-    if(tokenStream.current().kind == Kind::orKind) {
+    if(tokenStream.current().kind == Kind::bitwiseOr) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
-        eat(Kind::orKind);
+        eat(Kind::bitwiseOr);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = binaryTerm();
         binaryOpExpr->op = BinaryOpType::bitwiseOr;
-        return logicOrR(std::move(binaryOpExpr));
+        return bitwiseOrR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::rp 
             || tokenStream.current().kind == Kind::endOfStatement
             || tokenStream.current().kind == Kind::orKind
-            || tokenStream.current().kind == Kind::andKind){
+            || tokenStream.current().kind == Kind::andKind
+            || tokenStream.current().kind == Kind::equal
+            || tokenStream.current().kind == Kind::notEqual
+            || tokenStream.current().kind == Kind::greaterEqual
+            || tokenStream.current().kind == Kind::lessEqual
+            || tokenStream.current().kind == Kind::greater
+            || tokenStream.current().kind == Kind::less){
         return expr;
     } else {
         Error::parseError("no valid production for bitwise_or_r", tokenStream.current());
@@ -362,7 +368,7 @@ std::unique_ptr<Expr> Parser::bitwiseOrR(std::unique_ptr<Expr> expr) {
 
 std::unique_ptr<Expr> Parser::binaryTerm() {
     if(tokenStream.current().kind == Kind::lp || tokenStream.current().kind == Kind::name || tokenStream.current().kind == Kind::number) {
-        return bitwiseAndR(comp());
+        return bitwiseAndR(op());
     } else {
         Error::parseError("no valid production for binary_term", tokenStream.current());
         return nullptr;
@@ -370,18 +376,24 @@ std::unique_ptr<Expr> Parser::binaryTerm() {
 }
 
 std::unique_ptr<Expr> Parser::bitwiseAndR(std::unique_ptr<Expr> expr) {
-    if(tokenStream.current().kind == Kind::andKind) {
+    if(tokenStream.current().kind == Kind::bitwiseAnd) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
-        eat(Kind::andKind);
+        eat(Kind::bitwiseAnd);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = op();
         binaryOpExpr->op = BinaryOpType::bitwiseAnd;
-        return logicOrR(std::move(binaryOpExpr));
+        return bitwiseAndR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::rp 
             || tokenStream.current().kind == Kind::endOfStatement
             || tokenStream.current().kind == Kind::orKind
             || tokenStream.current().kind == Kind::andKind
-            || tokenStream.current().kind == Kind::bitwiseOr){
+            || tokenStream.current().kind == Kind::bitwiseOr
+            || tokenStream.current().kind == Kind::equal
+            || tokenStream.current().kind == Kind::notEqual
+            || tokenStream.current().kind == Kind::greaterEqual
+            || tokenStream.current().kind == Kind::lessEqual
+            || tokenStream.current().kind == Kind::greater
+            || tokenStream.current().kind == Kind::less){
         return expr;
     } else {
         Error::parseError("no valid production for bitwise_and_r", tokenStream.current());
@@ -391,7 +403,7 @@ std::unique_ptr<Expr> Parser::bitwiseAndR(std::unique_ptr<Expr> expr) {
 
 std::unique_ptr<Expr> Parser::comp() {
     if(tokenStream.current().kind == Kind::lp || tokenStream.current().kind == Kind::name || tokenStream.current().kind == Kind::number) {
-        return compOpR(op());
+        return compOpR(logicFactor());
     } else {
         Error::parseError("no valid production for binary_term", tokenStream.current());
         return nullptr;
@@ -403,50 +415,48 @@ std::unique_ptr<Expr> Parser::compOpR(std::unique_ptr<Expr> expr) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::equal);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = logicFactor();
         binaryOpExpr->op = BinaryOpType::equal;
-        return logicOrR(std::move(binaryOpExpr));
+        return compOpR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::notEqual) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::notEqual);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = logicFactor();
         binaryOpExpr->op = BinaryOpType::notEqual;
-        return logicOrR(std::move(binaryOpExpr));
+        return compOpR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::greaterEqual) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::greaterEqual);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = logicFactor();
         binaryOpExpr->op = BinaryOpType::greaterEqual;
-        return logicOrR(std::move(binaryOpExpr));
+        return compOpR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::lessEqual) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::lessEqual);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = logicFactor();
         binaryOpExpr->op = BinaryOpType::lessEqual;
-        return logicOrR(std::move(binaryOpExpr));
+        return compOpR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::less) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::less);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = logicFactor();
         binaryOpExpr->op = BinaryOpType::less;
-        return logicOrR(std::move(binaryOpExpr));
+        return compOpR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::greater) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::greater);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = logicFactor();
         binaryOpExpr->op = BinaryOpType::greater;
-        return logicOrR(std::move(binaryOpExpr));
+        return compOpR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::rp 
             || tokenStream.current().kind == Kind::endOfStatement
             || tokenStream.current().kind == Kind::orKind
-            || tokenStream.current().kind == Kind::andKind
-            || tokenStream.current().kind == Kind::bitwiseOr
-            || tokenStream.current().kind == Kind::bitwiseAnd){
+            || tokenStream.current().kind == Kind::andKind){
         return expr;
     } else {
         Error::parseError("no valid production for comp_op_r", tokenStream.current());
@@ -513,14 +523,14 @@ std::unique_ptr<Expr> Parser::mulR(std::unique_ptr<Expr> expr) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::mul);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = factor();
         binaryOpExpr->op = BinaryOpType::mul;
         return mulR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::div) {
         std::unique_ptr<BinaryOpExpr> binaryOpExpr{new BinaryOpExpr()};
         eat(Kind::div);
         binaryOpExpr->a = std::move(expr);
-        binaryOpExpr->b = term();
+        binaryOpExpr->b = factor();
         binaryOpExpr->op = BinaryOpType::div;
         return mulR(std::move(binaryOpExpr));
     } else if(tokenStream.current().kind == Kind::rp 

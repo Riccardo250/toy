@@ -3,10 +3,13 @@ flags = -MMD -MP
 name = a.out
 
 $(name) : $(objects)
-	g++ -o $(name) $(objects)
+	g++ $(debug_flags) -o $(name) $(objects)
+
+debug : $(name)
+debug : debug_flags += -ggdb
 
 %.o : %.cpp 
-	g++ $(flags) -c $< -o $@
+	g++ $(debug_flags) $(flags) -c $< -o $@
 
 -include $(objects:.o=.d)
 

@@ -196,10 +196,10 @@ std::string BinaryOpExpr::toJSONString() {
     std::string str{};
 
     str += "{";
-    str += "\"type\":\"AddOpExpr\",";
+    str += "\"type\":\"BinaryOpExpr\",";
     str += "\"a\":" + a->toJSONString() + ",";
     str += "\"b\":" + b->toJSONString() + ",";
-    str += "\"op\":" + binaryOpTypeToString(op);
+    str += "\"op\":\"" + binaryOpTypeToString(op) + "\"";
     str += "}";
     return str;
 }
